@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemasRouteImport } from './routes/temas'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
+import { Route as ResultadoNivelRouteImport } from './routes/resultado.$nivel'
 
 const TemasRoute = TemasRouteImport.update({
   id: '/temas',
@@ -28,34 +29,43 @@ const TriagemTemaRoute = TriagemTemaRouteImport.update({
   path: '/triagem/$tema',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResultadoNivelRoute = ResultadoNivelRouteImport.update({
+  id: '/resultado/$nivel',
+  path: '/resultado/$nivel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/temas': typeof TemasRoute
+  '/resultado/$nivel': typeof ResultadoNivelRoute
   '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/temas': typeof TemasRoute
+  '/resultado/$nivel': typeof ResultadoNivelRoute
   '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/temas': typeof TemasRoute
+  '/resultado/$nivel': typeof ResultadoNivelRoute
   '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/temas' | '/triagem/$tema'
+  fullPaths: '/' | '/temas' | '/resultado/$nivel' | '/triagem/$tema'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/temas' | '/triagem/$tema'
-  id: '__root__' | '/' | '/temas' | '/triagem/$tema'
+  to: '/' | '/temas' | '/resultado/$nivel' | '/triagem/$tema'
+  id: '__root__' | '/' | '/temas' | '/resultado/$nivel' | '/triagem/$tema'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TemasRoute: typeof TemasRoute
+  ResultadoNivelRoute: typeof ResultadoNivelRoute
   TriagemTemaRoute: typeof TriagemTemaRoute
 }
 
@@ -82,12 +92,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TriagemTemaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resultado/$nivel': {
+      id: '/resultado/$nivel'
+      path: '/resultado/$nivel'
+      fullPath: '/resultado/$nivel'
+      preLoaderRoute: typeof ResultadoNivelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TemasRoute: TemasRoute,
+  ResultadoNivelRoute: ResultadoNivelRoute,
   TriagemTemaRoute: TriagemTemaRoute,
 }
 export const routeTree = rootRouteImport
