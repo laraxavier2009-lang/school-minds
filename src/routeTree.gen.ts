@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemasRouteImport } from './routes/temas'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
 
 const TemasRoute = TemasRouteImport.update({
   id: '/temas',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TriagemTemaRoute = TriagemTemaRouteImport.update({
+  id: '/triagem/$tema',
+  path: '/triagem/$tema',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/temas': typeof TemasRoute
+  '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/temas': typeof TemasRoute
+  '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/temas': typeof TemasRoute
+  '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/temas'
+  fullPaths: '/' | '/temas' | '/triagem/$tema'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/temas'
-  id: '__root__' | '/' | '/temas'
+  to: '/' | '/temas' | '/triagem/$tema'
+  id: '__root__' | '/' | '/temas' | '/triagem/$tema'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TemasRoute: typeof TemasRoute
+  TriagemTemaRoute: typeof TriagemTemaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/triagem/$tema': {
+      id: '/triagem/$tema'
+      path: '/triagem/$tema'
+      fullPath: '/triagem/$tema'
+      preLoaderRoute: typeof TriagemTemaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TemasRoute: TemasRoute,
+  TriagemTemaRoute: TriagemTemaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
