@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -72,14 +73,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Saúde Mental na Escola — Acolhimento" },
+      { name: "description", content: "Chatbot educacional de acolhimento e triagem inicial para estudantes." },
+      { property: "og:title", content: "Saúde Mental na Escola" },
+      { property: "og:description", content: "Espaço seguro de escuta para estudantes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "theme-color", content: "#1B6CA8" },
     ],
     links: [
       {
@@ -113,7 +113,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <div className="mx-auto min-h-screen w-full max-w-[480px]">
+        <Outlet />
+      </div>
+      <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
 }
