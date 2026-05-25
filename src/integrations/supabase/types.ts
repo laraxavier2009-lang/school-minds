@@ -14,7 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alertas: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          id: string
+          prazo_dias: number
+          registro_id: string
+          status: Database["public"]["Enums"]["status_enum"]
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          prazo_dias?: number
+          registro_id: string
+          status?: Database["public"]["Enums"]["status_enum"]
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          prazo_dias?: number
+          registro_id?: string
+          status?: Database["public"]["Enums"]["status_enum"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alertas_registro_id_fkey"
+            columns: ["registro_id"]
+            isOneToOne: false
+            referencedRelation: "registros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registros: {
+        Row: {
+          criado_em: string
+          id: string
+          nivel_risco: Database["public"]["Enums"]["nivel_enum"]
+          tema: Database["public"]["Enums"]["tema_enum"]
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          nivel_risco: Database["public"]["Enums"]["nivel_enum"]
+          tema: Database["public"]["Enums"]["tema_enum"]
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          nivel_risco?: Database["public"]["Enums"]["nivel_enum"]
+          tema?: Database["public"]["Enums"]["tema_enum"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +78,19 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      nivel_enum: "leve" | "medio" | "grave"
+      status_enum:
+        | "pendente"
+        | "em_atendimento"
+        | "concluido"
+        | "nao_localizado"
+      tema_enum:
+        | "ansiedade"
+        | "tristeza"
+        | "bullying"
+        | "luto"
+        | "estresse"
+        | "pedir_ajuda"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +217,22 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      nivel_enum: ["leve", "medio", "grave"],
+      status_enum: [
+        "pendente",
+        "em_atendimento",
+        "concluido",
+        "nao_localizado",
+      ],
+      tema_enum: [
+        "ansiedade",
+        "tristeza",
+        "bullying",
+        "luto",
+        "estresse",
+        "pedir_ajuda",
+      ],
+    },
   },
 } as const
