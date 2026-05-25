@@ -288,7 +288,3 @@ const DICAS_POR_TEMA: Record<Tema, string> = {
   estresse: "Faça uma pausa real de tela e tarefas. Beba água, alongue o corpo e respire fundo por 1 minuto.",
   pedir_ajuda: "Reconhecer que precisa de ajuda já é um passo enorme. Procure alguém da escola para conversar nos próximos dias.",
 };
-// satisfaz no-unused: usado acima via DICAS_POR_TEMA[tema]
-export {};
-/* eslint-disable @typescript-eslint/no-unused-vars */
-type _UseNivel = NivelRisco;
