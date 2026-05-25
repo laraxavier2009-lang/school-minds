@@ -9,38 +9,120 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TemasRouteImport } from './routes/temas'
+import { Route as PainelRouteImport } from './routes/painel'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
+import { Route as ResultadoNivelRouteImport } from './routes/resultado.$nivel'
+import { Route as PainelLoginRouteImport } from './routes/painel.login'
 
+const TemasRoute = TemasRouteImport.update({
+  id: '/temas',
+  path: '/temas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelRoute = PainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TriagemTemaRoute = TriagemTemaRouteImport.update({
+  id: '/triagem/$tema',
+  path: '/triagem/$tema',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultadoNivelRoute = ResultadoNivelRouteImport.update({
+  id: '/resultado/$nivel',
+  path: '/resultado/$nivel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelLoginRoute = PainelLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => PainelRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/painel': typeof PainelRouteWithChildren
+  '/temas': typeof TemasRoute
+  '/painel/login': typeof PainelLoginRoute
+  '/resultado/$nivel': typeof ResultadoNivelRoute
+  '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/painel': typeof PainelRouteWithChildren
+  '/temas': typeof TemasRoute
+  '/painel/login': typeof PainelLoginRoute
+  '/resultado/$nivel': typeof ResultadoNivelRoute
+  '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/painel': typeof PainelRouteWithChildren
+  '/temas': typeof TemasRoute
+  '/painel/login': typeof PainelLoginRoute
+  '/resultado/$nivel': typeof ResultadoNivelRoute
+  '/triagem/$tema': typeof TriagemTemaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/painel'
+    | '/temas'
+    | '/painel/login'
+    | '/resultado/$nivel'
+    | '/triagem/$tema'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/painel'
+    | '/temas'
+    | '/painel/login'
+    | '/resultado/$nivel'
+    | '/triagem/$tema'
+  id:
+    | '__root__'
+    | '/'
+    | '/painel'
+    | '/temas'
+    | '/painel/login'
+    | '/resultado/$nivel'
+    | '/triagem/$tema'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PainelRoute: typeof PainelRouteWithChildren
+  TemasRoute: typeof TemasRoute
+  ResultadoNivelRoute: typeof ResultadoNivelRoute
+  TriagemTemaRoute: typeof TriagemTemaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/temas': {
+      id: '/temas'
+      path: '/temas'
+      fullPath: '/temas'
+      preLoaderRoute: typeof TemasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel': {
+      id: '/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof PainelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +130,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/triagem/$tema': {
+      id: '/triagem/$tema'
+      path: '/triagem/$tema'
+      fullPath: '/triagem/$tema'
+      preLoaderRoute: typeof TriagemTemaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resultado/$nivel': {
+      id: '/resultado/$nivel'
+      path: '/resultado/$nivel'
+      fullPath: '/resultado/$nivel'
+      preLoaderRoute: typeof ResultadoNivelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel/login': {
+      id: '/painel/login'
+      path: '/login'
+      fullPath: '/painel/login'
+      preLoaderRoute: typeof PainelLoginRouteImport
+      parentRoute: typeof PainelRoute
+    }
   }
 }
 
+interface PainelRouteChildren {
+  PainelLoginRoute: typeof PainelLoginRoute
+}
+
+const PainelRouteChildren: PainelRouteChildren = {
+  PainelLoginRoute: PainelLoginRoute,
+}
+
+const PainelRouteWithChildren =
+  PainelRoute._addFileChildren(PainelRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PainelRoute: PainelRouteWithChildren,
+  TemasRoute: TemasRoute,
+  ResultadoNivelRoute: ResultadoNivelRoute,
+  TriagemTemaRoute: TriagemTemaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
