@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemasRouteImport } from './routes/temas'
+import { Route as PainelRouteImport } from './routes/painel'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
 import { Route as ResultadoNivelRouteImport } from './routes/resultado.$nivel'
@@ -18,6 +19,11 @@ import { Route as PainelLoginRouteImport } from './routes/painel.login'
 const TemasRoute = TemasRouteImport.update({
   id: '/temas',
   path: '/temas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelRoute = PainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -36,13 +42,14 @@ const ResultadoNivelRoute = ResultadoNivelRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PainelLoginRoute = PainelLoginRouteImport.update({
-  id: '/painel/login',
-  path: '/painel/login',
-  getParentRoute: () => rootRouteImport,
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => PainelRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/painel': typeof PainelRouteWithChildren
   '/temas': typeof TemasRoute
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/painel': typeof PainelRouteWithChildren
   '/temas': typeof TemasRoute
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/painel': typeof PainelRouteWithChildren
   '/temas': typeof TemasRoute
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
@@ -67,15 +76,23 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/painel'
     | '/temas'
     | '/painel/login'
     | '/resultado/$nivel'
     | '/triagem/$tema'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/temas' | '/painel/login' | '/resultado/$nivel' | '/triagem/$tema'
+  to:
+    | '/'
+    | '/painel'
+    | '/temas'
+    | '/painel/login'
+    | '/resultado/$nivel'
+    | '/triagem/$tema'
   id:
     | '__root__'
     | '/'
+    | '/painel'
     | '/temas'
     | '/painel/login'
     | '/resultado/$nivel'
@@ -84,8 +101,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PainelRoute: typeof PainelRouteWithChildren
   TemasRoute: typeof TemasRoute
-  PainelLoginRoute: typeof PainelLoginRoute
   ResultadoNivelRoute: typeof ResultadoNivelRoute
   TriagemTemaRoute: typeof TriagemTemaRoute
 }
@@ -97,6 +114,13 @@ declare module '@tanstack/react-router' {
       path: '/temas'
       fullPath: '/temas'
       preLoaderRoute: typeof TemasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel': {
+      id: '/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -122,18 +146,29 @@ declare module '@tanstack/react-router' {
     }
     '/painel/login': {
       id: '/painel/login'
-      path: '/painel/login'
+      path: '/login'
       fullPath: '/painel/login'
       preLoaderRoute: typeof PainelLoginRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PainelRoute
     }
   }
 }
 
+interface PainelRouteChildren {
+  PainelLoginRoute: typeof PainelLoginRoute
+}
+
+const PainelRouteChildren: PainelRouteChildren = {
+  PainelLoginRoute: PainelLoginRoute,
+}
+
+const PainelRouteWithChildren =
+  PainelRoute._addFileChildren(PainelRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PainelRoute: PainelRouteWithChildren,
   TemasRoute: TemasRoute,
-  PainelLoginRoute: PainelLoginRoute,
   ResultadoNivelRoute: ResultadoNivelRoute,
   TriagemTemaRoute: TriagemTemaRoute,
 }
