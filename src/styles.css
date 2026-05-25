@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -63,25 +64,32 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --background: oklch(0.975 0.018 240);
+  --foreground: oklch(0.21 0.04 245);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.21 0.04 245);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.21 0.04 245);
+  --primary: oklch(0.5 0.12 245);
   --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
+  --secondary: oklch(0.74 0.16 152);
+  --secondary-foreground: oklch(0.16 0.02 245);
+  --muted: oklch(0.95 0.015 240);
+  --muted-foreground: oklch(0.52 0.04 235);
+  --accent: oklch(0.93 0.025 235);
+  --accent-foreground: oklch(0.21 0.04 245);
+  --destructive: oklch(0.62 0.22 28);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.9 0.02 240);
+  --input: oklch(0.92 0.018 240);
+  --ring: oklch(0.5 0.12 245);
+  --cor-primaria: #1B6CA8;
+  --cor-secundaria: #2ECC71;
+  --cor-alerta: #E67E22;
+  --cor-crise: #E74C3C;
+  --cor-fundo: #F0F7FF;
+  --cor-texto: #1A2B3C;
+  --cor-texto-leve: #5D7A8A;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -138,7 +146,39 @@
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    margin: 0;
+    min-height: 100vh;
   }
 }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(0.85); }
+  33% { transform: scale(1.15); }
+  66% { transform: scale(1.15); }
+}
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out both; }
+.animate-bounce-in { animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.animate-slide-in-right { animation: slideInRight 0.4s ease-out both; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out both; }
+.animate-breathe { animation: breathe 12s ease-in-out infinite; }
