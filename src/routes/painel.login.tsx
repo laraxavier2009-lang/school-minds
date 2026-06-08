@@ -17,10 +17,21 @@ function LoginPainel() {
   async function entrar(e: FormEvent) {
     e.preventDefault();
     setCarregando(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-    setCarregando(false);
-    if (error) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    if (error || !data.session) {
+      setCarregando(false);
       toast.error("Credenciais inválidas");
+      return;
+    }
+    const { data: equipe } = await supabase
+      .from("equipe_escola")
+      .select("id")
+      .eq("user_id", data.session.user.id)
+      .maybeSingle();
+    setCarregando(false);
+    if (!equipe) {
+      await supabase.auth.signOut();
+      toast.error("Este usuário não pertence à equipe escolar.");
       return;
     }
     void navigate({ to: "/painel" });
