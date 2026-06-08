@@ -12,6 +12,9 @@ function LoginPainel() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [nome, setNome] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [modoCriar, setModoCriar] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
   async function entrar(e: FormEvent) {
@@ -42,18 +45,28 @@ function LoginPainel() {
       toast.error("Informe e-mail e senha (mín. 6 caracteres).");
       return;
     }
+    if (!nome.trim() || !cargo.trim()) {
+      toast.error("Informe nome e cargo do membro da equipe.");
+      return;
+    }
     setCarregando(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password: senha,
       options: { emailRedirectTo: `${window.location.origin}/painel` },
     });
-    setCarregando(false);
     if (error) {
+      setCarregando(false);
       toast.error(error.message);
       return;
     }
-    toast.success("Conta criada. Se a confirmação por e-mail estiver ativa, verifique sua caixa.");
+    const userId = data.user?.id;
+    if (userId) {
+      await supabase.from("equipe_escola").insert({ user_id: userId, nome, cargo });
+    }
+    setCarregando(false);
+    toast.success("Cadastro realizado. Faça login para acessar o painel.");
+    setModoCriar(false);
   }
 
   return (
@@ -94,22 +107,52 @@ function LoginPainel() {
             style={{ borderColor: "#C8D2DD" }}
           />
         </label>
+        {modoCriar && (
+          <>
+            <label className="block">
+              <span className="text-sm font-bold" style={{ color: "var(--cor-texto)" }}>
+                Nome
+              </span>
+              <input
+                type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className="mt-1 h-12 w-full rounded-xl border bg-white px-3 text-base"
+                style={{ borderColor: "#C8D2DD" }}
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-bold" style={{ color: "var(--cor-texto)" }}>
+                Cargo
+              </span>
+              <input
+                type="text"
+                value={cargo}
+                onChange={(e) => setCargo(e.target.value)}
+                placeholder="ex.: Coordenadora pedagógica"
+                className="mt-1 h-12 w-full rounded-xl border bg-white px-3 text-base"
+                style={{ borderColor: "#C8D2DD" }}
+              />
+            </label>
+          </>
+        )}
         <button
-          type="submit"
+          type={modoCriar ? "button" : "submit"}
+          onClick={modoCriar ? criar : undefined}
           disabled={carregando}
           className="h-[52px] w-full rounded-xl text-base font-bold text-white disabled:opacity-60"
           style={{ background: "var(--cor-primaria)" }}
         >
-          {carregando ? "Entrando..." : "Entrar"}
+          {carregando ? "Processando..." : modoCriar ? "Criar conta" : "Entrar"}
         </button>
         <button
           type="button"
-          onClick={criar}
+          onClick={() => setModoCriar((v) => !v)}
           disabled={carregando}
           className="block w-full py-2 text-center text-sm underline-offset-2 hover:underline"
           style={{ color: "var(--cor-texto-leve)" }}
         >
-          Primeira vez? Criar conta da escola
+          {modoCriar ? "Já tenho conta — voltar ao login" : "Primeira vez? Criar conta da escola"}
         </button>
       </form>
     </main>
