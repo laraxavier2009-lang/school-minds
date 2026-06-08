@@ -49,6 +49,30 @@ export type Database = {
           },
         ]
       }
+      equipe_escola: {
+        Row: {
+          cargo: string
+          criado_em: string
+          id: string
+          nome: string
+          user_id: string
+        }
+        Insert: {
+          cargo: string
+          criado_em?: string
+          id?: string
+          nome: string
+          user_id: string
+        }
+        Update: {
+          cargo?: string
+          criado_em?: string
+          id?: string
+          nome?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       registros: {
         Row: {
           criado_em: string
