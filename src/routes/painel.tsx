@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LABELS_TEMA, type NivelRisco, type Tema } from "@/lib/triagem";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 type StatusEnum = "pendente" | "em_atendimento" | "concluido" | "nao_localizado";
 
@@ -18,8 +19,16 @@ interface AlertaRow {
 
 export const Route = createFileRoute("/painel")({
   head: () => ({ meta: [{ title: "Painel da escola — Saúde Mental" }] }),
-  component: PainelPage,
+  component: PainelPageGuarded,
 });
+
+function PainelPageGuarded() {
+  return (
+    <ProtectedRoute>
+      <PainelPage />
+    </ProtectedRoute>
+  );
+}
 
 function PainelPage() {
   const navigate = useNavigate();
@@ -120,7 +129,7 @@ function PainelPage() {
 
   async function sair() {
     await supabase.auth.signOut();
-    void navigate({ to: "/painel/login" });
+    void navigate({ to: "/" });
   }
 
   if (!pronto) {
