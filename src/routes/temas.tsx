@@ -18,7 +18,7 @@ function MenuTemas() {
     <main className="px-5 pt-4 pb-10">
       <header className="flex items-center">
         <Link
-          to="/"
+          to="/privacidade"
           aria-label="Voltar"
           className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-sm"
           style={{ color: "var(--cor-primaria)" }}
