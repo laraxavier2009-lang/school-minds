@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemasRouteImport } from './routes/temas'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
@@ -19,6 +20,11 @@ import { Route as PainelLoginRouteImport } from './routes/painel.login'
 const TemasRoute = TemasRouteImport.update({
   id: '/temas',
   path: '/temas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PainelRoute = PainelRouteImport.update({
@@ -50,6 +56,7 @@ const PainelLoginRoute = PainelLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/painel': typeof PainelRouteWithChildren
+  '/privacidade': typeof PrivacidadeRoute
   '/temas': typeof TemasRoute
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/painel': typeof PainelRouteWithChildren
+  '/privacidade': typeof PrivacidadeRoute
   '/temas': typeof TemasRoute
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/painel': typeof PainelRouteWithChildren
+  '/privacidade': typeof PrivacidadeRoute
   '/temas': typeof TemasRoute
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/painel'
+    | '/privacidade'
     | '/temas'
     | '/painel/login'
     | '/resultado/$nivel'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/painel'
+    | '/privacidade'
     | '/temas'
     | '/painel/login'
     | '/resultado/$nivel'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/painel'
+    | '/privacidade'
     | '/temas'
     | '/painel/login'
     | '/resultado/$nivel'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PainelRoute: typeof PainelRouteWithChildren
+  PrivacidadeRoute: typeof PrivacidadeRoute
   TemasRoute: typeof TemasRoute
   ResultadoNivelRoute: typeof ResultadoNivelRoute
   TriagemTemaRoute: typeof TriagemTemaRoute
@@ -114,6 +127,13 @@ declare module '@tanstack/react-router' {
       path: '/temas'
       fullPath: '/temas'
       preLoaderRoute: typeof TemasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/painel': {
@@ -168,6 +188,7 @@ const PainelRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PainelRoute: PainelRouteWithChildren,
+  PrivacidadeRoute: PrivacidadeRoute,
   TemasRoute: TemasRoute,
   ResultadoNivelRoute: ResultadoNivelRoute,
   TriagemTemaRoute: TriagemTemaRoute,
@@ -175,3 +196,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
