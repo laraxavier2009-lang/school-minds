@@ -3,69 +3,73 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Saúde Mental na Escola — Estou aqui para te ouvir" },
-      { name: "description", content: "Espaço de acolhimento e escuta inicial para estudantes do ensino médio. Confidencial e seguro." },
+      { title: "Saúde Mental na Escola — Portal" },
+      { name: "description", content: "Selecione o seu perfil de acesso: estudante ou equipe escolar." },
     ],
   }),
-  component: Privacidade,
+  component: Portal,
 });
 
-function Privacidade() {
+function Portal() {
   return (
-    <main className="flex min-h-screen flex-col items-center px-6 pt-10 pb-8">
-      <div className="w-full space-y-6">
-        <div className="animate-fade-in-up flex flex-col items-center text-center" style={{ animationDelay: "0ms" }}>
+    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-10">
+      <div className="w-full max-w-md space-y-6">
+        <header className="animate-fade-in-up text-center">
           <div className="text-5xl">🤝</div>
-        </div>
-        <div className="animate-fade-in-up text-center" style={{ animationDelay: "100ms" }}>
-          <h1 className="text-[28px] font-extrabold leading-tight" style={{ color: "var(--cor-primaria)" }}>
+          <h1 className="mt-2 text-[26px] font-extrabold leading-tight" style={{ color: "var(--cor-primaria)" }}>
             Saúde Mental na Escola
           </h1>
-          <p className="mt-2 text-base" style={{ color: "var(--cor-texto-leve)" }}>
-            Estou aqui para te ouvir
+          <p className="mt-1 text-base" style={{ color: "var(--cor-texto-leve)" }}>
+            Escolha como deseja acessar
           </p>
-        </div>
+        </header>
 
-        <div
-          className="animate-fade-in-up rounded-2xl border-l-4 bg-white p-5"
+        <Link
+          to="/privacidade"
+          className="animate-fade-in-up block rounded-2xl border-2 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg"
           style={{
-            borderLeftColor: "var(--cor-primaria)",
-            boxShadow: "0 2px 12px rgba(27, 108, 168, 0.10)",
+            borderColor: "#2ECC71",
+            boxShadow: "0 2px 12px rgba(46, 204, 113, 0.15)",
+            animationDelay: "100ms",
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">💚</span>
+            <div>
+              <h2 className="text-lg font-extrabold" style={{ color: "#1E8449" }}>
+                Portal do Estudante
+              </h2>
+              <p className="text-sm" style={{ color: "var(--cor-texto-leve)" }}>
+                Espaço anônimo de escuta e acolhimento.
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/painel/login"
+          className="animate-fade-in-up block rounded-2xl border-2 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+          style={{
+            borderColor: "#1B6CA8",
+            boxShadow: "0 2px 12px rgba(27, 108, 168, 0.15)",
             animationDelay: "200ms",
           }}
         >
-          <p className="text-[16px] font-bold" style={{ color: "var(--cor-texto)" }}>
-            🔒 Tudo o que conversarmos aqui é seguro e confidencial.
-          </p>
-          <p className="mt-3 text-[15px] leading-relaxed" style={{ color: "var(--cor-texto-leve)" }}>
-            Mas atenção: eu sou um robô. Não substituo psicólogo, não faço diagnóstico e não sou canal de emergência.
-          </p>
-        </div>
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🏫</span>
+            <div>
+              <h2 className="text-lg font-extrabold" style={{ color: "#1B6CA8" }}>
+                Acesso Gestão
+              </h2>
+              <p className="text-sm" style={{ color: "var(--cor-texto-leve)" }}>
+                Login restrito à equipe escolar.
+              </p>
+            </div>
+          </div>
+        </Link>
 
-        <hr className="border-t" style={{ borderColor: "rgba(27, 108, 168, 0.15)" }} />
-
-        <div className="animate-fade-in-up space-y-3" style={{ animationDelay: "300ms" }}>
-          <Link
-            to="/temas"
-            className="flex h-[52px] w-full items-center justify-center rounded-xl text-[18px] font-bold text-white transition-opacity hover:opacity-90"
-            style={{ background: "var(--cor-primaria)" }}
-          >
-            Quero continuar →
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "about:blank";
-            }}
-            className="block w-full py-2 text-center text-sm underline-offset-2 hover:underline"
-            style={{ color: "var(--cor-texto-leve)" }}
-          >
-            Prefiro sair
-          </button>
-        </div>
-
-        <p className="animate-fade-in-up text-center text-[13px]" style={{ color: "var(--cor-texto-leve)", animationDelay: "400ms" }}>
-          Nenhuma resposta sua fica salva.
+        <p className="animate-fade-in-up text-center text-[13px]" style={{ color: "var(--cor-texto-leve)", animationDelay: "300ms" }}>
+          Nenhum dado pessoal do estudante é armazenado.
         </p>
       </div>
     </main>
