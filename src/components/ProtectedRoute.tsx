@@ -24,12 +24,12 @@ export function ProtectedRoute({ children }: Props) {
       }
       const { data: equipe, error } = await supabase
         .from("equipe_escola")
-        .select("id")
+        .select("id, cargo")
         .eq("user_id", session.user.id)
         .maybeSingle();
       if (!ativo) return;
-      if (error || !equipe) {
-        toast.error("Acesso restrito à equipe escolar.");
+      if (error || !equipe || equipe.cargo !== "gestor") {
+        toast.error("Acesso negado. Área restrita a gestores.");
         await supabase.auth.signOut();
         void navigate({ to: "/painel/login" });
         return;

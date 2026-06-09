@@ -29,13 +29,13 @@ function LoginPainel() {
     }
     const { data: equipe } = await supabase
       .from("equipe_escola")
-      .select("id")
+      .select("id, cargo")
       .eq("user_id", data.session.user.id)
       .maybeSingle();
     setCarregando(false);
-    if (!equipe) {
+    if (!equipe || equipe.cargo !== "gestor") {
       await supabase.auth.signOut();
-      setErro("Acesso restrito: usuário não pertence à equipe escolar.");
+      setErro("Acesso negado. Esta área é restrita para gestores cadastrados.");
       return;
     }
     void navigate({ to: "/painel" });
