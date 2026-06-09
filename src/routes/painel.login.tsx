@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/painel/login")({
   head: () => ({ meta: [{ title: "Acesso à Gestão Escolar — Painel" }] }),
@@ -12,9 +11,6 @@ function LoginPainel() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [nome, setNome] = useState("");
-  const [cargo, setCargo] = useState("");
-  const [modoCriar, setModoCriar] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -43,37 +39,6 @@ function LoginPainel() {
       return;
     }
     void navigate({ to: "/painel" });
-  }
-
-  async function criar() {
-    if (!email || senha.length < 6) {
-      toast.error("Informe e-mail e senha (mín. 6 caracteres).");
-      return;
-    }
-    if (!nome.trim() || !cargo.trim()) {
-      toast.error("Informe nome e cargo do membro da equipe.");
-      return;
-    }
-    setCarregando(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: senha,
-      options: { emailRedirectTo: `${window.location.origin}/painel` },
-    });
-    if (error) {
-      setCarregando(false);
-      toast.error(error.message);
-      return;
-    }
-    const userId = data.user?.id;
-    if (userId) {
-      await supabase
-        .from("equipe_escola")
-        .insert({ user_id: userId, nome, cargo });
-    }
-    setCarregando(false);
-    toast.success("Cadastro realizado. Faça login para acessar o painel.");
-    setModoCriar(false);
   }
 
   return (
