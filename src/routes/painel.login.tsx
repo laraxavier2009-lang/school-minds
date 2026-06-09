@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/painel/login")({
   head: () => ({ meta: [{ title: "Acesso à Gestão Escolar — Painel" }] }),
@@ -12,9 +11,6 @@ function LoginPainel() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [nome, setNome] = useState("");
-  const [cargo, setCargo] = useState("");
-  const [modoCriar, setModoCriar] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -43,37 +39,6 @@ function LoginPainel() {
       return;
     }
     void navigate({ to: "/painel" });
-  }
-
-  async function criar() {
-    if (!email || senha.length < 6) {
-      toast.error("Informe e-mail e senha (mín. 6 caracteres).");
-      return;
-    }
-    if (!nome.trim() || !cargo.trim()) {
-      toast.error("Informe nome e cargo do membro da equipe.");
-      return;
-    }
-    setCarregando(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: senha,
-      options: { emailRedirectTo: `${window.location.origin}/painel` },
-    });
-    if (error) {
-      setCarregando(false);
-      toast.error(error.message);
-      return;
-    }
-    const userId = data.user?.id;
-    if (userId) {
-      await supabase
-        .from("equipe_escola")
-        .insert({ user_id: userId, nome, cargo });
-    }
-    setCarregando(false);
-    toast.success("Cadastro realizado. Faça login para acessar o painel.");
-    setModoCriar(false);
   }
 
   return (
@@ -157,83 +122,15 @@ function LoginPainel() {
             />
           </label>
 
-          {modoCriar && (
-            <>
-              <label className="block">
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: "var(--cor-texto)" }}
-                >
-                  Nome completo
-                </span>
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  required={modoCriar}
-                  className="mt-1 h-12 w-full rounded-xl border bg-white px-3 text-base outline-none focus:ring-2"
-                  style={{
-                    borderColor: "#C8D2DD",
-                    color: "var(--cor-texto)",
-                    fontSize: 16,
-                  }}
-                />
-              </label>
-              <label className="block">
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: "var(--cor-texto)" }}
-                >
-                  Cargo
-                </span>
-                <input
-                  type="text"
-                  value={cargo}
-                  onChange={(e) => setCargo(e.target.value)}
-                  required={modoCriar}
-                  placeholder="ex.: Coordenadora pedagógica"
-                  className="mt-1 h-12 w-full rounded-xl border bg-white px-3 text-base outline-none focus:ring-2"
-                  style={{
-                    borderColor: "#C8D2DD",
-                    color: "var(--cor-texto)",
-                    fontSize: 16,
-                  }}
-                />
-              </label>
-            </>
-          )}
-
           <button
-            type={modoCriar ? "button" : "submit"}
-            onClick={modoCriar ? criar : undefined}
+            type="submit"
             disabled={carregando}
             className="h-[52px] w-full rounded-xl text-base font-bold text-white transition-opacity hover:opacity-95 disabled:opacity-60"
             style={{ background: "var(--cor-primaria)", fontSize: 16 }}
           >
-            {carregando
-              ? "Processando..."
-              : modoCriar
-                ? "Criar conta"
-                : "Entrar no Painel"}
+            {carregando ? "Entrando..." : "Entrar no Painel"}
           </button>
         </form>
-
-        <div className="mt-4 text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setModoCriar((v) => !v);
-              setErro(null);
-            }}
-            disabled={carregando}
-            className="text-sm underline-offset-2 hover:underline"
-            style={{ color: "var(--cor-texto-leve)" }}
-          >
-            {modoCriar
-              ? "Já tenho conta — voltar ao login"
-              : "Primeira vez? Criar conta da escola"}
-          </button>
-        </div>
 
         <div className="mt-6 text-center">
           <Link
