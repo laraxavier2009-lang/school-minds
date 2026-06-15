@@ -13,6 +13,7 @@ import { Route as TemasRouteImport } from './routes/temas'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PainelIndexRouteImport } from './routes/painel.index'
 import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
 import { Route as ResultadoNivelRouteImport } from './routes/resultado.$nivel'
 import { Route as PainelLoginRouteImport } from './routes/painel.login'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PainelIndexRoute = PainelIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PainelRoute,
 } as any)
 const TriagemTemaRoute = TriagemTemaRouteImport.update({
   id: '/triagem/$tema',
@@ -61,15 +67,16 @@ export interface FileRoutesByFullPath {
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
   '/triagem/$tema': typeof TriagemTemaRoute
+  '/painel/': typeof PainelIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/painel': typeof PainelRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/temas': typeof TemasRoute
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
   '/triagem/$tema': typeof TriagemTemaRoute
+  '/painel': typeof PainelIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +87,7 @@ export interface FileRoutesById {
   '/painel/login': typeof PainelLoginRoute
   '/resultado/$nivel': typeof ResultadoNivelRoute
   '/triagem/$tema': typeof TriagemTemaRoute
+  '/painel/': typeof PainelIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,15 +99,16 @@ export interface FileRouteTypes {
     | '/painel/login'
     | '/resultado/$nivel'
     | '/triagem/$tema'
+    | '/painel/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/painel'
     | '/privacidade'
     | '/temas'
     | '/painel/login'
     | '/resultado/$nivel'
     | '/triagem/$tema'
+    | '/painel'
   id:
     | '__root__'
     | '/'
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/painel/login'
     | '/resultado/$nivel'
     | '/triagem/$tema'
+    | '/painel/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -150,6 +160,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/painel/': {
+      id: '/painel/'
+      path: '/'
+      fullPath: '/painel/'
+      preLoaderRoute: typeof PainelIndexRouteImport
+      parentRoute: typeof PainelRoute
+    }
     '/triagem/$tema': {
       id: '/triagem/$tema'
       path: '/triagem/$tema'
@@ -176,10 +193,12 @@ declare module '@tanstack/react-router' {
 
 interface PainelRouteChildren {
   PainelLoginRoute: typeof PainelLoginRoute
+  PainelIndexRoute: typeof PainelIndexRoute
 }
 
 const PainelRouteChildren: PainelRouteChildren = {
   PainelLoginRoute: PainelLoginRoute,
+  PainelIndexRoute: PainelIndexRoute,
 }
 
 const PainelRouteWithChildren =
