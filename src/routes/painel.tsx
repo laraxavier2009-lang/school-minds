@@ -42,13 +42,18 @@ function PainelPage() {
       if (!session) void navigate({ to: "/painel/login" });
     });
     void (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        void navigate({ to: "/painel/login" });
-        return;
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error || !data.session) {
+          void navigate({ to: "/painel/login" });
+          return;
+        }
+        await carregar();
+      } catch {
+        setErroCarga("Não foi possível verificar sua sessão.");
+      } finally {
+        setPronto(true);
       }
-      await carregar();
-      setPronto(true);
     })();
     return () => sub.subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
