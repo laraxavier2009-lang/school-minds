@@ -34,6 +34,7 @@ function PainelPage() {
   const navigate = useNavigate();
   const [pronto, setPronto] = useState(false);
   const [alertas, setAlertas] = useState<AlertaRow[]>([]);
+  const [erroCarga, setErroCarga] = useState<string | null>(null);
 
   // sessão + carga inicial
   useEffect(() => {
@@ -54,15 +55,21 @@ function PainelPage() {
   }, []);
 
   async function carregar() {
-    const { data, error } = await supabase
-      .from("alertas")
-      .select("id, registro_id, status, prazo_dias, criado_em, atualizado_em, registros(tema, nivel_risco, criado_em)")
-      .order("criado_em", { ascending: false });
-    if (error) {
-      toast.error("Não foi possível carregar os alertas.");
-      return;
+    try {
+      const { data, error } = await supabase
+        .from("alertas")
+        .select("id, registro_id, status, prazo_dias, criado_em, atualizado_em, registros(tema, nivel_risco, criado_em)")
+        .order("criado_em", { ascending: false });
+      if (error) {
+        setErroCarga("Não foi possível carregar os alertas no momento.");
+        toast.error("Não foi possível carregar os alertas.");
+        return;
+      }
+      setErroCarga(null);
+      setAlertas((data as unknown as AlertaRow[]) ?? []);
+    } catch {
+      setErroCarga("Não foi possível carregar os alertas no momento.");
     }
-    setAlertas((data as unknown as AlertaRow[]) ?? []);
   }
 
   // Realtime
@@ -134,8 +141,14 @@ function PainelPage() {
 
   if (!pronto) {
     return (
-      <main className="flex min-h-screen items-center justify-center text-sm" style={{ color: "var(--cor-texto-leve)" }}>
-        Carregando painel...
+      <main className="flex min-h-screen flex-col items-center justify-center gap-3" style={{ color: "var(--cor-texto-leve)" }}>
+        <div
+          className="h-10 w-10 animate-spin rounded-full border-4 border-solid"
+          style={{ borderColor: "#E0E6EE", borderTopColor: "var(--cor-primaria, #1B6CA8)" }}
+          role="status"
+          aria-label="Carregando painel"
+        />
+        <p className="text-sm font-semibold">Carregando painel…</p>
       </main>
     );
   }
@@ -165,6 +178,12 @@ function PainelPage() {
         <CardResumo cor="#FFF3E0" corTexto="#E67E22" label="Médios pendentes" valor={resumo.medios} />
         <CardResumo cor="#E8F8EF" corTexto="#1E8449" label="Concluídos (7d)" valor={resumo.concluidos} />
       </section>
+
+      {erroCarga && (
+        <div className="rounded-2xl border p-4 text-sm" style={{ background: "#FFF3E0", borderColor: "#E67E22", color: "#9C4A14" }}>
+          {erroCarga}
+        </div>
+      )}
 
       <section
         className="rounded-2xl bg-white p-4"
