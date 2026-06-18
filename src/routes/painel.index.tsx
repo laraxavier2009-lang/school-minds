@@ -354,16 +354,3 @@ function BadgeNivel({ nivel }: { nivel: NivelRisco }) {
     </span>
   );
 }
-
-function CardResumo({ cor, corTexto, label, valor }: { cor: string; corTexto: string; label: string; valor: number }) {
-  return (
-    <div className="rounded-2xl p-3 text-center" style={{ background: cor }}>
-      <div className="text-2xl font-extrabold" style={{ color: corTexto }}>
-        {valor}
-      </div>
-      <div className="mt-1 text-[11px] font-semibold leading-tight" style={{ color: corTexto }}>
-        {label}
-      </div>
-    </div>
-  );
-}
