@@ -24,8 +24,6 @@ function gerarMock(): AlertaMock[] {
   const agora = Date.now();
   const hora = 60 * 60 * 1000;
   const dia = 24 * hora;
-  const niveis: NivelRisco[] = ["leve", "medio", "grave"];
-  const statuses: StatusEnum[] = ["pendente", "em_atendimento", "concluido"];
   const base: Array<Omit<AlertaMock, "id">> = [
     { tema: "ansiedade", nivel: "grave", status: "pendente", criado_em: new Date(agora - 2 * hora).toISOString() },
     { tema: "bullying", nivel: "grave", status: "em_atendimento", criado_em: new Date(agora - 8 * hora).toISOString() },
@@ -38,8 +36,6 @@ function gerarMock(): AlertaMock[] {
     { tema: "bullying", nivel: "medio", status: "concluido", criado_em: new Date(agora - 6 * dia).toISOString() },
     { tema: "estresse", nivel: "leve", status: "concluido", criado_em: new Date(agora - 2 * dia).toISOString() },
   ];
-  void niveis;
-  void statuses;
   return base.map((b, i) => ({ ...b, id: `mock-${i}-${Math.random().toString(36).slice(2, 10)}` }));
 }
 
