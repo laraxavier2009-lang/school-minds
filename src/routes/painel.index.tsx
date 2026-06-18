@@ -138,37 +138,37 @@ function PainelPage() {
   return (
     <main className="min-h-screen pb-12" style={{ background: "var(--cor-fundo)", fontFamily: "Nunito, system-ui, sans-serif" }}>
       <header
-        className="flex items-center justify-between gap-3 px-5 py-4"
+        className="flex items-center justify-between gap-3 px-5 py-4 md:px-8 md:py-5"
         style={{ background: "#FFFFFF", boxShadow: "0 2px 8px rgba(27, 108, 168, 0.08)" }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <div
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-white font-extrabold"
+            className="grid h-10 w-10 md:h-12 md:w-12 shrink-0 place-items-center rounded-full text-white font-extrabold"
             style={{ background: "var(--cor-primaria)" }}
             aria-hidden
           >
             SM
           </div>
           <div className="min-w-0">
-            <h1 className="truncate text-base font-extrabold" style={{ color: "var(--cor-primaria)", lineHeight: 1.15 }}>
+            <h1 className="truncate text-base md:text-xl font-extrabold" style={{ color: "var(--cor-primaria)", lineHeight: 1.15 }}>
               Saúde Mental na Escola
             </h1>
-            <p className="truncate text-[11px] font-semibold" style={{ color: "var(--cor-texto-leve)" }}>
+            <p className="truncate text-[11px] md:text-xs font-semibold" style={{ color: "var(--cor-texto-leve)" }}>
               Painel de Gestão Escolar
             </p>
           </div>
         </div>
         <button
           onClick={sair}
-          className="shrink-0 rounded-lg border px-3 py-2 text-sm font-bold transition hover:opacity-80"
+          className="shrink-0 rounded-lg border px-3 py-2 md:px-4 text-sm font-bold transition hover:opacity-80"
           style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "#FFFFFF" }}
         >
           Sair
         </button>
       </header>
 
-      <div className="space-y-5 px-5 pt-5">
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="space-y-5 px-5 pt-5 md:px-8 md:pt-8 md:space-y-6">
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-5">
           <CardKPI
             cor="var(--cor-crise, #E74C3C)"
             bg="#FFEBEE"
@@ -192,14 +192,15 @@ function PainelPage() {
           />
         </section>
 
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <section
-          className="animate-fade-in-up rounded-2xl bg-white p-4"
+          className="animate-fade-in-up rounded-2xl bg-white p-4 md:p-6"
           style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)", animationDelay: "240ms", animationFillMode: "backwards" }}
         >
-          <h2 className="mb-3 text-sm font-extrabold" style={{ color: "var(--cor-texto)" }}>
+          <h2 className="mb-3 text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)" }}>
             Distribuição por tema
           </h2>
-          <div className="flex h-40 items-end justify-between gap-2">
+          <div className="flex h-40 md:h-52 items-end justify-between gap-2">
             {TEMAS_TODOS.map((t) => {
               const v = grafico.counts[t];
               const h = Math.max(6, (v / grafico.max) * 100);
@@ -221,13 +222,13 @@ function PainelPage() {
         </section>
 
         <section
-          className="animate-fade-in-up rounded-2xl bg-white p-4"
+          className="animate-fade-in-up rounded-2xl bg-white p-4 md:p-6"
           style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)", animationDelay: "320ms", animationFillMode: "backwards" }}
         >
-          <h2 className="mb-3 text-sm font-extrabold" style={{ color: "var(--cor-texto)" }}>
+          <h2 className="mb-3 text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)" }}>
             Acessos por dia da semana
           </h2>
-          <div className="flex h-32 items-end justify-between gap-2">
+          <div className="flex h-32 md:h-52 items-end justify-between gap-2">
             {acessosPorDia.labels.map((lbl, i) => {
               const v = acessosPorDia.valores[i];
               const h = Math.max(8, (v / acessosPorDia.max) * 100);
@@ -244,16 +245,17 @@ function PainelPage() {
             })}
           </div>
         </section>
+        </div>
 
         <section
           className="animate-fade-in-up overflow-hidden rounded-2xl bg-white"
           style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)", animationDelay: "400ms", animationFillMode: "backwards" }}
         >
-          <h2 className="border-b px-4 py-3 text-sm font-extrabold" style={{ color: "var(--cor-texto)", borderColor: "#E0E6EE" }}>
+          <h2 className="border-b px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)", borderColor: "#E0E6EE" }}>
             Sessões recentes
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-xs">
+            <table className="w-full min-w-[640px] text-left text-xs md:text-sm">
               <thead>
                 <tr style={{ background: "#F4F8FC", color: "var(--cor-texto-leve)" }}>
                   <th className="px-3 py-2 font-bold">ID</th>
