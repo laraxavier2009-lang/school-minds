@@ -367,17 +367,3 @@ function CardResumo({ cor, corTexto, label, valor }: { cor: string; corTexto: st
     </div>
   );
 }
-
-function BadgeNivel({ nivel }: { nivel: NivelRisco }) {
-  const map: Record<NivelRisco, { bg: string; fg: string; label: string }> = {
-    leve: { bg: "#E8F8EF", fg: "#1E8449", label: "Leve" },
-    medio: { bg: "#FFF3E0", fg: "#E67E22", label: "Médio" },
-    grave: { bg: "#FFEBEE", fg: "#E74C3C", label: "Grave" },
-  };
-  const s = map[nivel];
-  return (
-    <span className="rounded-full px-2 py-0.5 text-[11px] font-bold" style={{ background: s.bg, color: s.fg }}>
-      {s.label}
-    </span>
-  );
-}
