@@ -63,6 +63,13 @@ function LoginPainel() {
           Área restrita para psicólogos, orientadores e gestores
         </p>
 
+        <div
+          className="mt-3 rounded-md px-3 py-2 text-center text-[11px] font-semibold"
+          style={{ background: "#FFF7E0", color: "#9C4A14", border: "1px dashed #E6B36A" }}
+        >
+          Ambiente de Simulação — Login Administrativo
+        </div>
+
         {erro && (
           <div
             className="mt-4 rounded-lg p-3 text-center text-sm font-semibold text-white"
