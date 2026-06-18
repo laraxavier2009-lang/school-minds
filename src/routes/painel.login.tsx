@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/painel/login")({
   head: () => ({ meta: [{ title: "Acesso à Gestão Escolar — Painel" }] }),
@@ -17,28 +16,24 @@ function LoginPainel() {
   async function entrar(e: FormEvent) {
     e.preventDefault();
     setErro(null);
+    if (!email || !senha) {
+      setErro("Preencha e-mail e senha para continuar.");
+      return;
+    }
     setCarregando(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password: senha,
-    });
-    if (error || !data.session) {
+    // Ambiente de simulação: qualquer e-mail/senha é aceito.
+    try {
+      window.localStorage.setItem(
+        "painel_simulado_sessao",
+        JSON.stringify({ email, entrou_em: new Date().toISOString() }),
+      );
+    } catch {
+      /* ignore */
+    }
+    setTimeout(() => {
       setCarregando(false);
-      setErro("E-mail ou senha incorretos");
-      return;
-    }
-    const { data: equipe } = await supabase
-      .from("equipe_escola")
-      .select("id, cargo")
-      .eq("user_id", data.session.user.id)
-      .maybeSingle();
-    setCarregando(false);
-    if (!equipe || equipe.cargo !== "gestor") {
-      await supabase.auth.signOut();
-      setErro("Acesso negado. Esta área é restrita para gestores cadastrados.");
-      return;
-    }
-    void navigate({ to: "/painel" });
+      void navigate({ to: "/painel" });
+    }, 400);
   }
 
   return (
