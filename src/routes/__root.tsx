@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
@@ -116,10 +117,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isPanel = pathname.startsWith("/painel") && !pathname.startsWith("/painel/login");
+  const wrapperClass = isPanel
+    ? "mx-auto min-h-screen w-full max-w-7xl"
+    : "mx-auto min-h-screen w-full max-w-[480px]";
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="mx-auto min-h-screen w-full max-w-[480px]">
+      <div className={wrapperClass}>
         <Outlet />
       </div>
       <Toaster position="top-right" richColors />
