@@ -4,6 +4,7 @@ import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
 import { supabase } from "@/integrations/supabase/client";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
+import logoBrain from "@/assets/logo-brain.png";
 
 type Search = { tema?: Tema };
 
@@ -98,7 +99,9 @@ function RespostaLeve({ tema }: { tema?: Tema }) {
 function RespostaMedio() {
   return (
     <main className="px-5 pt-6 pb-10 space-y-5">
-      <div className="flex justify-center text-6xl">🤝</div>
+      <div className="flex justify-center">
+        <img src={logoBrain} alt="Saúde Mental na Escola" className="h-28 w-auto" />
+      </div>
       <h1 className="text-center text-[22px] font-extrabold" style={{ color: "var(--cor-texto)" }}>
         Percebo que tem sido difícil
       </h1>
