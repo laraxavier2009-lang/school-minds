@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import logoBrain from "@/assets/logo-brain.png";
 
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
@@ -15,13 +16,10 @@ function Privacidade() {
     <main className="flex min-h-screen flex-col items-center px-6 pt-10 pb-8">
       <div className="w-full space-y-6">
         <div className="animate-fade-in-up flex flex-col items-center text-center" style={{ animationDelay: "0ms" }}>
-          <div className="text-5xl">🤝</div>
+          <img src={logoBrain} alt="Saúde Mental na Escola" className="h-40 w-auto sm:h-48" />
         </div>
         <div className="animate-fade-in-up text-center" style={{ animationDelay: "100ms" }}>
-          <h1 className="text-[28px] font-extrabold leading-tight" style={{ color: "var(--cor-primaria)" }}>
-            Saúde Mental na Escola
-          </h1>
-          <p className="mt-2 text-base" style={{ color: "var(--cor-texto-leve)" }}>
+          <p className="text-base" style={{ color: "var(--cor-texto-leve)" }}>
             Estou aqui para te ouvir
           </p>
         </div>
