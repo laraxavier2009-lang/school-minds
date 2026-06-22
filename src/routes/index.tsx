@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import logoBrain from "@/assets/logo-brain.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -15,7 +16,7 @@ function Portal() {
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-10">
       <div className="w-full max-w-md space-y-6">
         <header className="animate-fade-in-up text-center">
-          <div className="text-5xl">🤝</div>
+          <img src={logoBrain} alt="Saúde Mental na Escola" className="mx-auto h-24 w-auto" />
           <h1 className="mt-2 text-[26px] font-extrabold leading-tight" style={{ color: "var(--cor-primaria)" }}>
             Saúde Mental na Escola
           </h1>
