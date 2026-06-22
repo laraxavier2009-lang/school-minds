@@ -16,11 +16,12 @@ function Portal() {
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-10">
       <div className="w-full max-w-md space-y-6">
         <header className="animate-fade-in-up text-center">
-          <img src={logoBrain} alt="Saúde Mental na Escola" className="mx-auto h-24 w-auto" />
-          <h1 className="mt-2 text-[26px] font-extrabold leading-tight" style={{ color: "var(--cor-primaria)" }}>
-            Saúde Mental na Escola
-          </h1>
-          <p className="mt-1 text-base" style={{ color: "var(--cor-texto-leve)" }}>
+          <img
+            src={logoBrain}
+            alt="Saúde Mental na Escola"
+            className="mx-auto h-48 w-auto sm:h-56"
+          />
+          <p className="mt-3 text-base" style={{ color: "var(--cor-texto-leve)" }}>
             Escolha como deseja acessar
           </p>
         </header>
