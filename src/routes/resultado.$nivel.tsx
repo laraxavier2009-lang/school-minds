@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
-import { RespiracaoCard as RespiracaoCardShared } from "@/components/RespiracaoCard";
 import { supabase } from "@/integrations/supabase/client";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
 import logoBrain from "@/assets/logo-brain.png";
