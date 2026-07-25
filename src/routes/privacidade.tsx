@@ -40,6 +40,40 @@ function Privacidade() {
           </p>
         </div>
 
+        <div
+          className="animate-fade-in-up rounded-2xl border-l-4 bg-white p-5"
+          style={{
+            borderLeftColor: "var(--cor-crise)",
+            boxShadow: "0 2px 12px rgba(231, 76, 60, 0.12)",
+            animationDelay: "250ms",
+          }}
+        >
+          <p className="text-[15px] font-bold" style={{ color: "var(--cor-crise)" }}>
+            🚨 Precisa de ajuda urgente agora?
+          </p>
+          <p className="mt-2 text-[14px] leading-relaxed" style={{ color: "var(--cor-texto-leve)" }}>
+            O CVV (Centro de Valorização da Vida) atende 24h, é gratuito e sigiloso.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <a
+              href="tel:188"
+              className="flex h-11 flex-1 items-center justify-center rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: "var(--cor-crise)" }}
+            >
+              📞 Ligar 188
+            </a>
+            <a
+              href="https://www.cvv.org.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-11 flex-1 items-center justify-center rounded-xl border-2 text-sm font-bold transition-opacity hover:opacity-80"
+              style={{ borderColor: "var(--cor-crise)", color: "var(--cor-crise)", background: "#FFF" }}
+            >
+              cvv.org.br ↗
+            </a>
+          </div>
+        </div>
+
         <hr className="border-t" style={{ borderColor: "rgba(27, 108, 168, 0.15)" }} />
 
         <div className="animate-fade-in-up space-y-3" style={{ animationDelay: "300ms" }}>
