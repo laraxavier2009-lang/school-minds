@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
+import { RespiracaoCard as RespiracaoCardShared } from "@/components/RespiracaoCard";
 import { supabase } from "@/integrations/supabase/client";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
 import logoBrain from "@/assets/logo-brain.png";
@@ -50,8 +51,8 @@ function Resultado() {
   }, [tema, nivel]);
 
   if (nivel === "leve") return <RespostaLeve tema={tema} />;
-  if (nivel === "medio") return <RespostaMedio />;
-  return <RespostaGrave />;
+  if (nivel === "medio") return <RespostaMedio tema={tema} />;
+  return <RespostaGrave tema={tema} />;
 }
 
 function RespostaLeve({ tema }: { tema?: Tema }) {
@@ -96,7 +97,36 @@ function RespostaLeve({ tema }: { tema?: Tema }) {
   );
 }
 
-function RespostaMedio() {
+function ConfirmacaoPedidoAjuda({ prioridade }: { prioridade: "alta" | "urgente" }) {
+  return (
+    <div
+      className="animate-fade-in-up rounded-2xl border-2 p-5"
+      style={{
+        background: "linear-gradient(135deg, #E8F4FD 0%, #FFF3F3 100%)",
+        borderColor: prioridade === "urgente" ? "var(--cor-crise)" : "var(--cor-primaria)",
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-3xl">🤝</span>
+        <div>
+          <h3 className="text-lg font-extrabold" style={{ color: "var(--cor-texto)" }}>
+            Seu pedido chegou até nós
+          </h3>
+          <p className="mt-2 text-[15px] leading-relaxed" style={{ color: "var(--cor-texto)" }}>
+            {prioridade === "urgente"
+              ? "Recebemos seu pedido com prioridade máxima. A equipe da escola já foi avisada e vai te procurar com carinho e discrição — você não está sozinho(a)."
+              : "Recebemos seu pedido com prioridade. A equipe de orientação foi avisada e vai encontrar um jeito acolhedor de te procurar nos próximos dias."}
+          </p>
+          <p className="mt-2 text-[13px]" style={{ color: "var(--cor-texto-leve)" }}>
+            Seu nome não aparece. Apenas o tema e o nível de atenção foram compartilhados.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RespostaMedio({ tema }: { tema?: Tema }) {
   return (
     <main className="px-5 pt-6 pb-10 space-y-5">
       <div className="flex justify-center">
@@ -106,6 +136,8 @@ function RespostaMedio() {
         Percebo que tem sido difícil
       </h1>
       <ChatBubble texto="Você não precisa carregar isso sozinho(a). Conversar com alguém de confiança pode ajudar muito." />
+
+      {tema === "pedir_ajuda" && <ConfirmacaoPedidoAjuda prioridade="alta" />}
 
       <div
         className="rounded-2xl border-l-4 bg-white p-5"
@@ -165,7 +197,7 @@ function RespostaMedio() {
   );
 }
 
-function RespostaGrave() {
+function RespostaGrave({ tema }: { tema?: Tema }) {
   return (
     <main className="px-5 pt-0 pb-10 space-y-4">
       <div
@@ -178,6 +210,8 @@ function RespostaGrave() {
       <div className="pt-4">
         <ChatBubble texto="Sinto muito que você está passando por isso. Como sou um robô, preciso garantir sua segurança com ajuda de uma pessoa real." />
       </div>
+
+      {tema === "pedir_ajuda" && <ConfirmacaoPedidoAjuda prioridade="urgente" />}
 
       <CardContato
         icone="📞"
