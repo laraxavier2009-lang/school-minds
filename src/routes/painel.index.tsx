@@ -12,17 +12,14 @@ import {
   YAxis,
 } from "recharts";
 import { LABELS_TEMA, type NivelRisco, type Tema } from "@/lib/triagem";
-
-type StatusEnum = "pendente" | "em_atendimento" | "concluido";
-
-interface AlertaMock {
-  id: string;
-  tema: Tema;
-  nivel: NivelRisco;
-  status: StatusEnum;
-  criado_em: string;
-  anotacao?: string;
-}
+import { supabase } from "@/integrations/supabase/client";
+import {
+  atualizarStatusAlerta,
+  criarAnotacao,
+  listarSessoes,
+  type SessaoPainel,
+  type StatusEnum,
+} from "@/lib/dados";
 
 export const Route = createFileRoute("/painel/")({
   head: () => ({ meta: [{ title: "Painel de Gestão Escolar — Saúde Mental" }] }),
@@ -31,29 +28,10 @@ export const Route = createFileRoute("/painel/")({
 
 const TEMAS_TODOS: Tema[] = ["ansiedade", "tristeza", "bullying", "luto", "estresse", "pedir_ajuda"];
 
-function gerarMock(): AlertaMock[] {
-  const agora = Date.now();
-  const hora = 60 * 60 * 1000;
-  const dia = 24 * hora;
-  const base: Array<Omit<AlertaMock, "id">> = [
-    { tema: "ansiedade", nivel: "grave", status: "pendente", criado_em: new Date(agora - 2 * hora).toISOString() },
-    { tema: "bullying", nivel: "grave", status: "em_atendimento", criado_em: new Date(agora - 8 * hora).toISOString() },
-    { tema: "tristeza", nivel: "medio", status: "pendente", criado_em: new Date(agora - 1 * dia).toISOString() },
-    { tema: "pedir_ajuda", nivel: "grave", status: "pendente", criado_em: new Date(agora - 30 * 60 * 1000).toISOString() },
-    { tema: "estresse", nivel: "medio", status: "em_atendimento", criado_em: new Date(agora - 2 * dia).toISOString() },
-    { tema: "luto", nivel: "medio", status: "pendente", criado_em: new Date(agora - 3 * dia).toISOString() },
-    { tema: "ansiedade", nivel: "leve", status: "concluido", criado_em: new Date(agora - 4 * dia).toISOString() },
-    { tema: "tristeza", nivel: "leve", status: "concluido", criado_em: new Date(agora - 5 * dia).toISOString() },
-    { tema: "bullying", nivel: "medio", status: "concluido", criado_em: new Date(agora - 6 * dia).toISOString() },
-    { tema: "estresse", nivel: "leve", status: "concluido", criado_em: new Date(agora - 2 * dia).toISOString() },
-  ];
-  return base.map((b, i) => ({ ...b, id: `mock-${i}-${Math.random().toString(36).slice(2, 10)}` }));
-}
-
 function PainelPage() {
   const navigate = useNavigate();
   const [autorizado, setAutorizado] = useState<boolean | null>(null);
-  const [alertas, setAlertas] = useState<AlertaMock[]>([]);
+  const [alertas, setAlertas] = useState<SessaoPainel[]>([]);
   const [filtroNivel, setFiltroNivel] = useState<"todos" | NivelRisco>("todos");
   const [filtroStatus, setFiltroStatus] = useState<"todos" | StatusEnum>("todos");
   const [anotandoId, setAnotandoId] = useState<string | null>(null);
@@ -62,38 +40,40 @@ function PainelPage() {
   const [diaAtivo, setDiaAtivo] = useState<number | null>(null);
 
   useEffect(() => {
-    try {
-      const sess = window.localStorage.getItem("painel_simulado_sessao");
-      if (!sess) {
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
         setAutorizado(false);
         void navigate({ to: "/painel/login" });
         return;
       }
       setAutorizado(true);
-      setAlertas(gerarMock());
-    } catch {
-      setAutorizado(false);
-      void navigate({ to: "/painel/login" });
-    }
+      setAlertas(await listarSessoes());
+    })();
   }, [navigate]);
 
-  // Simulação de realtime: dispara um alerta GRAVE após 6s.
+  // Realtime: novos registros chegam ao painel imediatamente.
   useEffect(() => {
     if (!autorizado) return;
-    const t = setTimeout(() => {
-      const novo: AlertaMock = {
-        id: `mock-rt-${Math.random().toString(36).slice(2, 10)}`,
-        tema: "pedir_ajuda",
-        nivel: "grave",
-        status: "pendente",
-        criado_em: new Date().toISOString(),
-      };
-      setAlertas((prev) => [novo, ...prev]);
-      toast.error("🚨 Novo alerta GRAVE recebido", {
-        description: `Tema: ${LABELS_TEMA[novo.tema]} • requer atenção imediata`,
-      });
-    }, 6000);
-    return () => clearTimeout(t);
+    const canal = supabase
+      .channel("painel-registros")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "registros" },
+        (payload) => {
+          const novo = payload.new as { tema: Tema; nivel_risco: NivelRisco };
+          if (novo.nivel_risco === "grave") {
+            toast.error("🚨 Novo alerta GRAVE recebido", {
+              description: `Tema: ${LABELS_TEMA[novo.tema]} • requer atenção imediata`,
+            });
+          }
+          void listarSessoes().then(setAlertas);
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(canal);
+    };
   }, [autorizado]);
 
   const resumo = useMemo(() => {
@@ -121,25 +101,45 @@ function PainelPage() {
 
   const acessosPorDia = useMemo(() => {
     const labels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-    const valores = [12, 28, 34, 22, 41, 38, 9];
-    const max = Math.max(...valores);
+    const valores = [0, 0, 0, 0, 0, 0, 0];
+    for (const a of alertas) valores[new Date(a.criado_em).getDay()]++;
+    const max = Math.max(1, ...valores);
     return { labels, valores, max };
-  }, []);
+  }, [alertas]);
 
-  function alterarStatus(id: string, status: StatusEnum) {
-    setAlertas((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+  async function alterarStatus(sessao: SessaoPainel, status: StatusEnum) {
+    if (!sessao.alerta_id) {
+      toast.error("Esta sessão é de risco leve e não gera acompanhamento.");
+      return;
+    }
+    const ok = await atualizarStatusAlerta(sessao.alerta_id, sessao.status, status);
+    if (!ok) {
+      toast.error("Não foi possível atualizar o status.");
+      return;
+    }
+    setAlertas((prev) => prev.map((a) => (a.registro_id === sessao.registro_id ? { ...a, status } : a)));
     toast.success("Status atualizado");
   }
 
-  function abrirAnotacao(id: string) {
-    const atual = alertas.find((a) => a.id === id);
-    setRascunhoAnotacao(atual?.anotacao ?? "");
-    setAnotandoId(id);
+  function abrirAnotacao(sessao: SessaoPainel) {
+    if (!sessao.alerta_id) {
+      toast.error("Esta sessão é de risco leve e não permite anotações.");
+      return;
+    }
+    setRascunhoAnotacao("");
+    setAnotandoId(sessao.alerta_id);
   }
 
-  function salvarAnotacao() {
+  async function salvarAnotacao() {
     if (!anotandoId) return;
-    setAlertas((prev) => prev.map((a) => (a.id === anotandoId ? { ...a, anotacao: rascunhoAnotacao.trim() } : a)));
+    const texto = rascunhoAnotacao.trim();
+    if (!texto) return;
+    const ok = await criarAnotacao(anotandoId, texto);
+    if (!ok) {
+      toast.error("Não foi possível salvar a anotação.");
+      return;
+    }
+    setAlertas(await listarSessoes());
     toast.success("Anotação registrada");
     setAnotandoId(null);
     setRascunhoAnotacao("");
@@ -156,12 +156,12 @@ function PainelPage() {
   function exportarCSV() {
     const header = ["id", "tema", "nivel_risco", "status", "criado_em", "anotacao"];
     const linhas = alertas.map((a) => [
-      a.id.replace(/-/g, "").slice(0, 8),
+      a.registro_id.replace(/-/g, "").slice(0, 8),
       LABELS_TEMA[a.tema],
       a.nivel,
       a.status,
       new Date(a.criado_em).toISOString(),
-      (a.anotacao ?? "").replace(/"/g, '""'),
+      (a.ultimaAnotacao ?? "").replace(/"/g, '""'),
     ]);
     const csv = [header, ...linhas]
       .map((row) => row.map((v) => `"${String(v)}"`).join(","))
@@ -178,9 +178,9 @@ function PainelPage() {
     toast.success("Relatório exportado (CSV anonimizado)");
   }
 
-  function sair() {
-    try { window.localStorage.removeItem("painel_simulado_sessao"); } catch { /* ignore */ }
-    void navigate({ to: "/painel/login" });
+  async function sair() {
+    await supabase.auth.signOut();
+    void navigate({ to: "/painel/login", replace: true });
   }
 
   if (autorizado === null) {
@@ -223,7 +223,7 @@ function PainelPage() {
           </div>
         </div>
         <button
-          onClick={sair}
+          onClick={() => void sair()}
           className="shrink-0 rounded-lg border px-3 py-2 md:px-4 text-sm font-bold transition hover:opacity-80"
           style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "#FFFFFF" }}
         >
