@@ -403,10 +403,10 @@ function PainelPage() {
                 {alertasFiltrados.map((a) => {
                   const grave = a.nivel === "grave";
                   return (
-                    <tr key={a.id} className="border-t" style={{ background: grave ? "#FFEBEE" : "transparent", borderColor: "#E0E6EE" }}>
+                    <tr key={a.registro_id} className="border-t" style={{ background: grave ? "#FFEBEE" : "transparent", borderColor: "#E0E6EE" }}>
                       <td className="px-3 py-2 font-mono text-[11px]" style={{ color: "var(--cor-texto-leve)" }}>
-                        #{a.id.replace(/-/g, "").slice(0, 8)}
-                        {a.anotacao ? <span title={a.anotacao} className="ml-1">📝</span> : null}
+                        #{a.registro_id.replace(/-/g, "").slice(0, 8)}
+                        {a.ultimaAnotacao ? <span title={a.ultimaAnotacao} className="ml-1">📝</span> : null}
                       </td>
                       <td className="px-3 py-2">
                         <span className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white" style={{ background: "var(--cor-primaria)" }}>
@@ -422,7 +422,7 @@ function PainelPage() {
                         <div className="flex flex-wrap items-center gap-1">
                           <select
                             value={a.status}
-                            onChange={(e) => alterarStatus(a.id, e.target.value as StatusEnum)}
+                            onChange={(e) => void alterarStatus(a, e.target.value as StatusEnum)}
                             className="rounded-lg border bg-white px-2 py-1 text-[11px] font-semibold"
                             style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)" }}
                             aria-label="Alterar status"
@@ -432,7 +432,7 @@ function PainelPage() {
                             <option value="concluido">Concluído</option>
                           </select>
                           <button
-                            onClick={() => abrirAnotacao(a.id)}
+                            onClick={() => abrirAnotacao(a)}
                             className="rounded-lg border px-2 py-1 text-[11px] font-bold transition hover:opacity-80"
                             style={{ borderColor: "#C8D2DD", color: "var(--cor-primaria)", background: "#fff" }}
                             aria-label="Adicionar anotação interna"
@@ -487,7 +487,7 @@ function PainelPage() {
                 Cancelar
               </button>
               <button
-                onClick={salvarAnotacao}
+                onClick={() => void salvarAnotacao()}
                 className="rounded-lg px-4 py-2 text-sm font-bold text-white"
                 style={{ background: "var(--cor-primaria)" }}
               >
@@ -518,6 +518,7 @@ function BadgeStatus({ status }: { status: StatusEnum }) {
     pendente: { bg: "#FFF3E0", fg: "#E67E22", label: "Pendente" },
     em_atendimento: { bg: "#E3F1FB", fg: "#1B6CA8", label: "Em atendimento" },
     concluido: { bg: "#E8F8EF", fg: "#1E8449", label: "Concluído" },
+    nao_localizado: { bg: "#ECEFF1", fg: "#607D8B", label: "Não localizado" },
   };
   const s = map[status];
   return (
