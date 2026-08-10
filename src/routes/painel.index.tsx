@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { LABELS_TEMA, type NivelRisco, type Tema } from "@/lib/triagem";
 
 type StatusEnum = "pendente" | "em_atendimento" | "concluido";
