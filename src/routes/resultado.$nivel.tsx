@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
-import { supabase } from "@/integrations/supabase/client";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
 import logoBrain from "@/assets/logo-brain.png";
 
@@ -24,30 +23,6 @@ function Resultado() {
   const { nivel } = Route.useParams();
   const { tema } = Route.useSearch();
   if (!isNivel(nivel)) return null;
-
-  const enviado = useRef(false);
-
-  useEffect(() => {
-    if (enviado.current || !tema) return;
-    enviado.current = true;
-    void (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("registros")
-          .insert({ tema, nivel_risco: nivel })
-          .select()
-          .single();
-        if (error || !data) return;
-        if (nivel === "medio" || nivel === "grave") {
-          await supabase
-            .from("alertas")
-            .insert({ registro_id: data.id, status: "pendente", prazo_dias: 7 });
-        }
-      } catch {
-        // silencioso — não bloquear a tela de acolhimento por erro de rede
-      }
-    })();
-  }, [tema, nivel]);
 
   if (nivel === "leve") return <RespostaLeve tema={tema} />;
   if (nivel === "medio") return <RespostaMedio tema={tema} />;
