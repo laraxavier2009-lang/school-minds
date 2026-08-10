@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/painel/login")({
   head: () => ({ meta: [{ title: "Acesso à Gestão Escolar — Painel" }] }),
@@ -21,19 +22,47 @@ function LoginPainel() {
       return;
     }
     setCarregando(true);
-    // Ambiente de simulação: qualquer e-mail/senha é aceito.
     try {
-      window.localStorage.setItem(
-        "painel_simulado_sessao",
-        JSON.stringify({ email, entrou_em: new Date().toISOString() }),
-      );
-    } catch {
-      /* ignore */
-    }
-    setTimeout(() => {
+      // Ambiente de simulação: qualquer e-mail/senha é aceito.
+      // Se a conta ainda não existir, ela é criada automaticamente.
+      let { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+      if (error) {
+        const cadastro = await supabase.auth.signUp({ email, password: senha });
+        if (cadastro.error) {
+          setErro(cadastro.error.message);
+          setCarregando(false);
+          return;
+        }
+        const nova = await supabase.auth.signInWithPassword({ email, password: senha });
+        data = nova.data;
+        error = nova.error;
+        if (error) {
+          setErro("Não foi possível entrar. Tente novamente.");
+          setCarregando(false);
+          return;
+        }
+      }
+      const user = data.user;
+      if (user) {
+        const { data: membro } = await supabase
+          .from("equipe_escola")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!membro) {
+          await supabase.from("equipe_escola").insert({
+            user_id: user.id,
+            nome: email.split("@")[0],
+            cargo: "gestor",
+          });
+        }
+      }
       setCarregando(false);
       void navigate({ to: "/painel" });
-    }, 400);
+    } catch {
+      setErro("Não foi possível entrar. Verifique sua conexão.");
+      setCarregando(false);
+    }
   }
 
   return (

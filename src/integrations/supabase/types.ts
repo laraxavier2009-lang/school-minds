@@ -49,6 +49,77 @@ export type Database = {
           },
         ]
       }
+      anotacoes: {
+        Row: {
+          alerta_id: string
+          atualizado_em: string
+          autor_id: string
+          criado_em: string
+          id: string
+          texto: string
+        }
+        Insert: {
+          alerta_id: string
+          atualizado_em?: string
+          autor_id: string
+          criado_em?: string
+          id?: string
+          texto: string
+        }
+        Update: {
+          alerta_id?: string
+          atualizado_em?: string
+          autor_id?: string
+          criado_em?: string
+          id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anotacoes_alerta_id_fkey"
+            columns: ["alerta_id"]
+            isOneToOne: false
+            referencedRelation: "alertas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contatos_apoio: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          criado_em: string
+          descricao: string | null
+          id: string
+          nome: string
+          ordem: number
+          site: string | null
+          telefone: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          ordem?: number
+          site?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          criado_em?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          ordem?: number
+          site?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
       equipe_escola: {
         Row: {
           cargo: string
@@ -73,26 +144,108 @@ export type Database = {
         }
         Relationships: []
       }
+      historico_status: {
+        Row: {
+          alerta_id: string
+          autor_id: string | null
+          criado_em: string
+          id: string
+          status_anterior: Database["public"]["Enums"]["status_enum"] | null
+          status_novo: Database["public"]["Enums"]["status_enum"]
+        }
+        Insert: {
+          alerta_id: string
+          autor_id?: string | null
+          criado_em?: string
+          id?: string
+          status_anterior?: Database["public"]["Enums"]["status_enum"] | null
+          status_novo: Database["public"]["Enums"]["status_enum"]
+        }
+        Update: {
+          alerta_id?: string
+          autor_id?: string | null
+          criado_em?: string
+          id?: string
+          status_anterior?: Database["public"]["Enums"]["status_enum"] | null
+          status_novo?: Database["public"]["Enums"]["status_enum"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historico_status_alerta_id_fkey"
+            columns: ["alerta_id"]
+            isOneToOne: false
+            referencedRelation: "alertas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registros: {
         Row: {
           criado_em: string
           id: string
           nivel_risco: Database["public"]["Enums"]["nivel_enum"]
+          origem: string
+          pediu_ajuda: boolean
+          pontuacao_total: number
           tema: Database["public"]["Enums"]["tema_enum"]
         }
         Insert: {
           criado_em?: string
           id?: string
           nivel_risco: Database["public"]["Enums"]["nivel_enum"]
+          origem?: string
+          pediu_ajuda?: boolean
+          pontuacao_total?: number
           tema: Database["public"]["Enums"]["tema_enum"]
         }
         Update: {
           criado_em?: string
           id?: string
           nivel_risco?: Database["public"]["Enums"]["nivel_enum"]
+          origem?: string
+          pediu_ajuda?: boolean
+          pontuacao_total?: number
           tema?: Database["public"]["Enums"]["tema_enum"]
         }
         Relationships: []
+      }
+      respostas: {
+        Row: {
+          criado_em: string
+          id: string
+          opcao: string
+          ordem: number
+          pergunta: string
+          peso: number
+          registro_id: string
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          opcao: string
+          ordem?: number
+          pergunta: string
+          peso?: number
+          registro_id: string
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          opcao?: string
+          ordem?: number
+          pergunta?: string
+          peso?: number
+          registro_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respostas_registro_id_fkey"
+            columns: ["registro_id"]
+            isOneToOne: false
+            referencedRelation: "registros"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

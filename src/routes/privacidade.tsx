@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { listarContatosApoio, type ContatoApoio } from "@/lib/dados";
 import logoBrain from "@/assets/logo-brain.png";
 
 export const Route = createFileRoute("/privacidade")({
@@ -12,6 +14,16 @@ export const Route = createFileRoute("/privacidade")({
 });
 
 function Privacidade() {
+  const [contatos, setContatos] = useState<ContatoApoio[]>([]);
+
+  useEffect(() => {
+    void listarContatosApoio().then(setContatos);
+  }, []);
+
+  const cvv = contatos.find((c) => c.telefone === "188");
+  const telCvv = cvv?.telefone ?? "188";
+  const siteCvv = cvv?.site ?? "https://www.cvv.org.br";
+
   return (
     <main className="flex min-h-screen flex-col items-center px-6 pt-10 pb-8">
       <div className="w-full space-y-6">
@@ -52,18 +64,18 @@ function Privacidade() {
             🚨 Precisa de ajuda urgente agora?
           </p>
           <p className="mt-2 text-[14px] leading-relaxed" style={{ color: "var(--cor-texto-leve)" }}>
-            O CVV (Centro de Valorização da Vida) atende 24h, é gratuito e sigiloso.
+            {cvv?.descricao ?? "O CVV (Centro de Valorização da Vida) atende 24h, é gratuito e sigiloso."}
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <a
-              href="tel:188"
+              href={`tel:${telCvv}`}
               className="flex h-11 flex-1 items-center justify-center rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
               style={{ background: "var(--cor-crise)" }}
             >
-              📞 Ligar 188
+              📞 Ligar {telCvv}
             </a>
             <a
-              href="https://www.cvv.org.br"
+              href={siteCvv}
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-11 flex-1 items-center justify-center rounded-xl border-2 text-sm font-bold transition-opacity hover:opacity-80"
