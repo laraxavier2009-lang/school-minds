@@ -4,6 +4,7 @@ import { ChatBubble } from "@/components/ChatBubble";
 import { BotaoOpcao } from "@/components/BotaoOpcao";
 import { ProgressoPerguntas } from "@/components/ProgressoPerguntas";
 import { RespiracaoCard } from "@/components/RespiracaoCard";
+import { salvarSessaoTriagem, type RespostaSessao } from "@/lib/dados";
 import {
   PERGUNTAS_POR_TEMA,
   LABELS_TEMA,
@@ -32,10 +33,12 @@ function Perguntas() {
 
   const [idx, setIdx] = useState(0);
   const [pesos, setPesos] = useState<number[]>([]);
+  const [respostas, setRespostas] = useState<RespostaSessao[]>([]);
   const [respirou, setRespirou] = useState(false);
 
-  const finalizar = (todos: number[]) => {
+  const finalizar = (todos: number[], todasRespostas: RespostaSessao[]) => {
     const nivel = calcularNivel(todos);
+    void salvarSessaoTriagem({ tema, nivel, respostas: todasRespostas });
     navigate({
       to: "/resultado/$nivel",
       params: { nivel },
@@ -43,17 +46,22 @@ function Perguntas() {
     });
   };
 
-  const escolher = (peso: number) => {
+  const escolher = (peso: number, textoOpcao: string) => {
     const novos = [...pesos, peso];
+    const novasRespostas: RespostaSessao[] = [
+      ...respostas,
+      { ordem: idx, pergunta: perguntas[idx].texto, opcao: textoOpcao, peso },
+    ];
     if (peso === 3) {
-      finalizar(novos);
+      finalizar(novos, novasRespostas);
       return;
     }
     if (idx + 1 >= perguntas.length) {
-      finalizar(novos);
+      finalizar(novos, novasRespostas);
       return;
     }
     setPesos(novos);
+    setRespostas(novasRespostas);
     setIdx(idx + 1);
   };
 
@@ -125,7 +133,7 @@ function Perguntas() {
           <BotaoOpcao
             key={`${pergunta.id}-${i}`}
             texto={op.texto}
-            onClick={() => escolher(op.peso)}
+            onClick={() => escolher(op.peso, op.texto)}
           />
         ))}
       </div>
