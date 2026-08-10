@@ -58,6 +58,8 @@ function PainelPage() {
   const [filtroStatus, setFiltroStatus] = useState<"todos" | StatusEnum>("todos");
   const [anotandoId, setAnotandoId] = useState<string | null>(null);
   const [rascunhoAnotacao, setRascunhoAnotacao] = useState("");
+  const [temaAtivo, setTemaAtivo] = useState<number | null>(null);
+  const [diaAtivo, setDiaAtivo] = useState<number | null>(null);
 
   useEffect(() => {
     try {
