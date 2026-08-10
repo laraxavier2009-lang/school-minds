@@ -263,24 +263,32 @@ function PainelPage() {
           <h2 className="mb-3 text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)" }}>
             Distribuição por tema
           </h2>
-          <div className="flex h-40 md:h-52 items-end justify-between gap-2">
-            {TEMAS_TODOS.map((t) => {
-              const v = grafico.counts[t];
-              const h = Math.max(6, (v / grafico.max) * 100);
-              return (
-                <div key={t} className="flex flex-1 flex-col items-center gap-1">
-                  <span className="text-[10px] font-bold" style={{ color: "var(--cor-texto)" }}>{v}</span>
-                  <div
-                    className="w-full rounded-t-md transition-all"
-                    style={{ height: `${h}%`, background: "var(--cor-primaria)" }}
-                    aria-label={`${LABELS_TEMA[t]}: ${v}`}
-                  />
-                  <span className="text-[10px] text-center leading-tight" style={{ color: "var(--cor-texto-leve)" }}>
-                    {LABELS_TEMA[t]}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="h-40 md:h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={TEMAS_TODOS.map((t) => ({ nome: LABELS_TEMA[t], valor: grafico.counts[t] }))}
+                margin={{ top: 16, right: 8, left: -20, bottom: 0 }}
+                onMouseLeave={() => setTemaAtivo(null)}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#E0E6EE" vertical={false} />
+                <XAxis dataKey="nome" tick={{ fontSize: 10, fill: "#6B7A8D" }} interval={0} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#6B7A8D" }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: "rgba(27,108,168,0.06)" }}
+                  formatter={(v: number) => [`${v} sessões`, "Total"]}
+                  contentStyle={{ borderRadius: 12, border: "1px solid #E0E6EE", fontSize: 12 }}
+                />
+                <Bar dataKey="valor" radius={[6, 6, 0, 0]} onMouseEnter={(_, i) => setTemaAtivo(i)}>
+                  {TEMAS_TODOS.map((t, i) => (
+                    <Cell
+                      key={t}
+                      fill="var(--cor-primaria)"
+                      fillOpacity={temaAtivo === null || temaAtivo === i ? 1 : 0.45}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </section>
 
@@ -291,21 +299,32 @@ function PainelPage() {
           <h2 className="mb-3 text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)" }}>
             Acessos por dia da semana
           </h2>
-          <div className="flex h-32 md:h-52 items-end justify-between gap-2">
-            {acessosPorDia.labels.map((lbl, i) => {
-              const v = acessosPorDia.valores[i];
-              const h = Math.max(8, (v / acessosPorDia.max) * 100);
-              return (
-                <div key={lbl} className="flex flex-1 flex-col items-center gap-1">
-                  <span className="text-[10px] font-bold" style={{ color: "var(--cor-texto)" }}>{v}</span>
-                  <div
-                    className="w-full rounded-t-md"
-                    style={{ height: `${h}%`, background: "var(--cor-secundaria, #1E8449)" }}
-                  />
-                  <span className="text-[10px]" style={{ color: "var(--cor-texto-leve)" }}>{lbl}</span>
-                </div>
-              );
-            })}
+          <div className="h-40 md:h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={acessosPorDia.labels.map((lbl, i) => ({ nome: lbl, valor: acessosPorDia.valores[i] }))}
+                margin={{ top: 16, right: 8, left: -20, bottom: 0 }}
+                onMouseLeave={() => setDiaAtivo(null)}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#E0E6EE" vertical={false} />
+                <XAxis dataKey="nome" tick={{ fontSize: 10, fill: "#6B7A8D" }} interval={0} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#6B7A8D" }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: "rgba(46,204,113,0.08)" }}
+                  formatter={(v: number) => [`${v} acessos`, "Total"]}
+                  contentStyle={{ borderRadius: 12, border: "1px solid #E0E6EE", fontSize: 12 }}
+                />
+                <Bar dataKey="valor" radius={[6, 6, 0, 0]} onMouseEnter={(_, i) => setDiaAtivo(i)}>
+                  {acessosPorDia.labels.map((lbl, i) => (
+                    <Cell
+                      key={lbl}
+                      fill="var(--cor-secundaria, #2ECC71)"
+                      fillOpacity={diaAtivo === null || diaAtivo === i ? 1 : 0.45}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </section>
         </div>
