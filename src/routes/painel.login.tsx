@@ -23,39 +23,26 @@ function LoginPainel() {
     }
     setCarregando(true);
     try {
-      // Ambiente de simulação: qualquer e-mail/senha é aceito.
-      // Se a conta ainda não existir, ela é criada automaticamente.
-      let { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error) {
-        const cadastro = await supabase.auth.signUp({ email, password: senha });
-        if (cadastro.error) {
-          setErro(cadastro.error.message);
-          setCarregando(false);
-          return;
-        }
-        const nova = await supabase.auth.signInWithPassword({ email, password: senha });
-        data = nova.data;
-        error = nova.error;
-        if (error) {
-          setErro("Não foi possível entrar. Tente novamente.");
-          setCarregando(false);
-          return;
-        }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: senha,
+      });
+      if (error || !data.user) {
+        setErro("E-mail ou senha inválidos.");
+        setCarregando(false);
+        return;
       }
-      const user = data.user;
-      if (user) {
-        const { data: membro } = await supabase
-          .from("equipe_escola")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (!membro) {
-          await supabase.from("equipe_escola").insert({
-            user_id: user.id,
-            nome: email.split("@")[0],
-            cargo: "gestor",
-          });
-        }
+      // Somente membros cadastrados na equipe da escola acessam os alertas.
+      const { data: membro } = await supabase
+        .from("equipe_escola")
+        .select("id, cargo")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+      if (!membro || membro.cargo !== "gestor") {
+        await supabase.auth.signOut();
+        setErro("Este usuário não faz parte da equipe autorizada da escola.");
+        setCarregando(false);
+        return;
       }
       setCarregando(false);
       void navigate({ to: "/painel" });
@@ -93,10 +80,10 @@ function LoginPainel() {
         </p>
 
         <div
-          className="mt-3 rounded-md px-3 py-2 text-center text-[11px] font-semibold"
+          className="mt-3 rounded-md px-3 py-2 text-center text-[11px] font-semibold leading-relaxed"
           style={{ background: "#FFF7E0", color: "#9C4A14", border: "1px dashed #E6B36A" }}
         >
-          Ambiente de Simulação — Login Administrativo
+          Acesso de teste: gestao@escolapiaui.edu.br · MentalEscola@2026
         </div>
 
         {erro && (
