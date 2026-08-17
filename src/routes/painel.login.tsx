@@ -28,7 +28,7 @@ function LoginPainel() {
         password: senha,
       });
       if (error || !data.user) {
-        setErro("E-mail ou senha inválidos.");
+        setErro("E-mail ou senha incorretos.");
         setCarregando(false);
         return;
       }
@@ -38,9 +38,9 @@ function LoginPainel() {
         .select("id, cargo")
         .eq("user_id", data.user.id)
         .maybeSingle();
-      if (!membro || membro.cargo !== "gestor") {
+      if (!membro || !["gestor", "psicologo", "orientador"].includes(membro.cargo)) {
         await supabase.auth.signOut();
-        setErro("Este usuário não faz parte da equipe autorizada da escola.");
+        setErro("Acesso não autorizado para este perfil.");
         setCarregando(false);
         return;
       }
