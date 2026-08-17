@@ -39,8 +39,8 @@ export function ProtectedRoute({ children }: Props) {
           void navigate({ to: "/painel/login" });
           return;
         }
-        if (equipe.cargo !== "gestor") {
-          toast.error("Acesso negado. Área restrita a gestores.");
+        if (!["gestor", "psicologo", "orientador"].includes(equipe.cargo)) {
+          toast.error("Acesso não autorizado para este perfil.");
           await supabase.auth.signOut();
           void navigate({ to: "/painel/login" });
           return;
