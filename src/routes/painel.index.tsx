@@ -28,6 +28,12 @@ export const Route = createFileRoute("/painel/")({
 
 const TEMAS_TODOS: Tema[] = ["ansiedade", "tristeza", "bullying", "luto", "estresse", "pedir_ajuda"];
 
+const LABELS_CARGO: Record<string, string> = {
+  gestor: "Gestor(a)",
+  psicologo: "Psicólogo(a)",
+  orientador: "Orientador(a)",
+};
+
 function PainelPage() {
   const navigate = useNavigate();
   const [autorizado, setAutorizado] = useState<boolean | null>(null);
