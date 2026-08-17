@@ -124,6 +124,7 @@ export type Database = {
         Row: {
           cargo: string
           criado_em: string
+          email: string | null
           id: string
           nome: string
           user_id: string
@@ -131,6 +132,7 @@ export type Database = {
         Insert: {
           cargo: string
           criado_em?: string
+          email?: string | null
           id?: string
           nome: string
           user_id: string
@@ -138,6 +140,7 @@ export type Database = {
         Update: {
           cargo?: string
           criado_em?: string
+          email?: string | null
           id?: string
           nome?: string
           user_id?: string
