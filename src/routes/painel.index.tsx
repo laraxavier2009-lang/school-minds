@@ -31,6 +31,7 @@ const TEMAS_TODOS: Tema[] = ["ansiedade", "tristeza", "bullying", "luto", "estre
 function PainelPage() {
   const navigate = useNavigate();
   const [autorizado, setAutorizado] = useState<boolean | null>(null);
+  const [perfil, setPerfil] = useState<{ nome: string; cargo: string } | null>(null);
   const [alertas, setAlertas] = useState<SessaoPainel[]>([]);
   const [filtroNivel, setFiltroNivel] = useState<"todos" | NivelRisco>("todos");
   const [filtroStatus, setFiltroStatus] = useState<"todos" | StatusEnum>("todos");
@@ -47,6 +48,19 @@ function PainelPage() {
         void navigate({ to: "/painel/login" });
         return;
       }
+      const { data: membro } = await supabase
+        .from("equipe_escola")
+        .select("nome, cargo")
+        .eq("user_id", data.session.user.id)
+        .maybeSingle();
+      if (!membro || !["gestor", "psicologo", "orientador"].includes(membro.cargo)) {
+        toast.error("Acesso não autorizado para este perfil.");
+        await supabase.auth.signOut();
+        setAutorizado(false);
+        void navigate({ to: "/painel/login" });
+        return;
+      }
+      setPerfil({ nome: membro.nome, cargo: membro.cargo });
       setAutorizado(true);
       setAlertas(await listarSessoes());
     })();
@@ -179,6 +193,7 @@ function PainelPage() {
   }
 
   async function sair() {
+    setPerfil(null);
     await supabase.auth.signOut();
     void navigate({ to: "/painel/login", replace: true });
   }
@@ -218,7 +233,7 @@ function PainelPage() {
               Saúde Mental na Escola
             </h1>
             <p className="truncate text-[11px] md:text-xs font-semibold" style={{ color: "var(--cor-texto-leve)" }}>
-              Painel de Gestão Escolar
+              {perfil ? `${perfil.nome} • ${LABELS_CARGO[perfil.cargo] ?? perfil.cargo}` : "Painel de Gestão Escolar"}
             </p>
           </div>
         </div>
