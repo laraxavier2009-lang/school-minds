@@ -214,21 +214,22 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
             id="desabafo"
             value={desabafo}
             onChange={(e) => setDesabafo(e.target.value)}
-            placeholder="Sinta-se à vontade para escrever aqui... (Este espaço é opcional e o texto não será salvo por questões de sua privacidade)."
-            className="min-h-[140px] w-full resize-none rounded-[12px] border border-[#D1E3F0] bg-white p-4 text-[15px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+            placeholder="Escreva aqui seu desabafo (opcional)..."
+            className="min-h-[180px] w-full resize-none rounded-[12px] border border-[#D1E3F0] bg-white p-4 text-[16px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
             style={{ color: "var(--cor-texto)" }}
           />
           <p className="text-center text-[12px]" style={{ color: "var(--cor-texto-leve)" }}>
-            Por segurança e sigilo, o que você escreve aqui é apagado assim que a sessão terminar.
+            Seu relato é guardado de forma totalmente anônima, sem qualquer ligação com você.
           </p>
 
           <button
             type="button"
-            onClick={() => setMostrarContatos(true)}
-            className="flex h-[52px] w-full items-center justify-center rounded-xl text-[17px] font-bold text-white transition-opacity hover:opacity-90"
+            disabled={enviando}
+            onClick={() => void avancar()}
+            className="flex h-[52px] w-full items-center justify-center rounded-xl text-[17px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
             style={{ background: "var(--cor-secundaria)" }}
           >
-            Pronto, quero ver os canais de ajuda →
+            {enviando ? "Enviando..." : "Pronto, quero ver os canais de ajuda →"}
           </button>
 
           <button
