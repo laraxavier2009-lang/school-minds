@@ -79,7 +79,7 @@ function Privacidade() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-11 flex-1 items-center justify-center rounded-xl border-2 text-sm font-bold transition-opacity hover:opacity-80"
-              style={{ borderColor: "var(--cor-crise)", color: "var(--cor-crise)", background: "#FFF" }}
+              style={{ borderColor: "var(--cor-crise)", color: "var(--cor-crise)", background: "var(--cor-card)" }}
             >
               cvv.org.br ↗
             </a>

@@ -60,7 +60,7 @@ function LoginPainel() {
       <div
         className="w-full max-w-sm animate-fade-in-up"
         style={{
-          background: "#FFFFFF",
+          background: "var(--cor-card)",
           borderRadius: 12,
           boxShadow: "0 4px 24px rgba(27, 108, 168, 0.12)",
           padding: "32px",
