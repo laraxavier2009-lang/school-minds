@@ -470,8 +470,43 @@ function PainelPage() {
           </div>
         </section>
 
+        <section className="rounded-2xl bg-white p-4 md:p-5" style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)" }}>
+          <h2 className="text-sm font-extrabold md:text-base" style={{ color: "var(--cor-texto)" }}>
+            💬 Mural de desabafos anônimos
+          </h2>
+          <p className="mt-1 text-[11px]" style={{ color: "var(--cor-texto-leve)" }}>
+            Relatos enviados voluntariamente pelos estudantes. Não há qualquer vínculo com identidade, sessão ou dispositivo.
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {desabafos.length === 0 && (
+              <p className="text-[12px]" style={{ color: "var(--cor-texto-leve)" }}>
+                Nenhum desabafo registrado até o momento.
+              </p>
+            )}
+            {desabafos.map((d) => (
+              <article
+                key={d.id}
+                className="rounded-xl border-l-4 p-4"
+                style={{ background: "#F7FAFD", borderLeftColor: "var(--cor-primaria)" }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: "var(--cor-primaria)" }}>
+                    {LABELS_TEMA[d.tema as Tema] ?? d.tema}
+                  </span>
+                  <span className="text-[10px]" style={{ color: "var(--cor-texto-leve)" }}>
+                    {new Date(d.criado_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                  </span>
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed" style={{ color: "var(--cor-texto)" }}>
+                  {d.texto}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <p className="text-center text-[11px]" style={{ color: "var(--cor-texto-leve)" }}>
-          Conformidade LGPD — exibimos apenas status, tema e nível de risco. O conteúdo das conversas nunca é mostrado.
+          Conformidade LGPD — sessões exibem apenas status, tema e nível de risco. Os desabafos são anônimos e sem rastreabilidade.
         </p>
       </div>
 
