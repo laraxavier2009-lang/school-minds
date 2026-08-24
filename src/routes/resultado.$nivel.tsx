@@ -200,7 +200,7 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
       <div className="pt-4 space-y-4">
         <ChatBubble texto="Sinto muito que você está passando por isso. Como sou um robô, preciso garantir sua segurança com ajuda de uma pessoa real." />
 
-        <ChatBubble texto="Eu percebo que você está passando por um momento muito difícil. Se você sentir que ajuda, pode usar o espaço abaixo para desabafar ou escrever como realmente está se sentindo agora. Isso é apenas para você se expressar." />
+        <ChatBubble texto="Sinto muito que você esteja passando por isso. Se quiser, você pode usar o espaço abaixo para desabafar ou escrever o que está sentindo agora. Sua mensagem será salva anonimamente no nosso sistema para ajudar a coordenação a entender as principais dores dos estudantes, mas sua identidade nunca será revelada. Esse espaço é totalmente opcional." />
       </div>
 
       {tema === "pedir_ajuda" && <ConfirmacaoPedidoAjuda prioridade="urgente" />}
