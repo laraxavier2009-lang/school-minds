@@ -89,6 +89,8 @@
   --cor-fundo: #F0F7FF;
   --cor-texto: #1A2B3C;
   --cor-texto-leve: #5D7A8A;
+  --cor-card: #FFFFFF;
+  --cor-borda: rgba(27, 108, 168, 0.10);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -137,6 +139,15 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --cor-primaria: #4A9BD8;
+  --cor-secundaria: #2ECC71;
+  --cor-alerta: #E67E22;
+  --cor-crise: #E74C3C;
+  --cor-fundo: #0B132B;
+  --cor-texto: #F8FAFC;
+  --cor-texto-leve: #94A3B8;
+  --cor-card: #1C2541;
+  --cor-borda: #2A3454;
 }
 
 @layer base {
@@ -151,7 +162,44 @@
     font-size: 16px;
     margin: 0;
     min-height: 100vh;
+    transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
   }
+
+  html, body, a, button, input, textarea, select, h1, h2, h3, h4, p, span, div, section, li, td, th {
+    transition: background-color 300ms ease-in-out, border-color 300ms ease-in-out, color 300ms ease-in-out;
+  }
+}
+
+/* Superfícies brancas viram azul ardósia no modo noturno */
+.dark .bg-white,
+.dark .bg-card {
+  background-color: var(--cor-card) !important;
+  border-color: var(--cor-borda);
+}
+
+.dark .bg-white:not(.border-l-4):not([class*="border-l"]) {
+  border: 1px solid var(--cor-borda);
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--cor-card) !important;
+  border-color: var(--cor-borda) !important;
+  color: var(--cor-texto);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--cor-texto-leve);
+}
+
+/* Hover sutil nos botões de escolha no tema escuro */
+.dark a[class*="rounded-2xl"]:hover,
+.dark button[class*="rounded-2xl"]:hover,
+.dark .botao-escolha:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(74, 155, 216, 0.28), 0 0 0 1px rgba(74, 155, 216, 0.35);
 }
 
 @keyframes fadeInUp {
