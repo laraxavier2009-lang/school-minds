@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
+import { salvarDesabafo } from "@/lib/dados";
 import logoBrain from "@/assets/logo-brain.png";
 
 type Search = { tema?: Tema };
