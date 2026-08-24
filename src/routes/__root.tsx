@@ -11,6 +11,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { AlternadorTema } from "@/components/AlternadorTema";
 
 function NotFoundComponent() {
   return (
