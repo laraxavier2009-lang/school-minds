@@ -174,6 +174,19 @@ function RespostaMedio({ tema }: { tema?: Tema }) {
 function RespostaGrave({ tema }: { tema?: Tema }) {
   const [mostrarContatos, setMostrarContatos] = useState(false);
   const [desabafo, setDesabafo] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  async function avancar() {
+    if (enviando) return;
+    setEnviando(true);
+    try {
+      await salvarDesabafo(tema ?? "pedir_ajuda", desabafo);
+    } finally {
+      setEnviando(false);
+      setMostrarContatos(true);
+    }
+  }
+
 
   return (
     <main className="px-5 pt-0 pb-10 space-y-4">
