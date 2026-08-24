@@ -120,6 +120,27 @@ export type Database = {
         }
         Relationships: []
       }
+      desabafos_anonimos: {
+        Row: {
+          criado_em: string
+          id: string
+          tema: string
+          texto: string | null
+        }
+        Insert: {
+          criado_em?: string
+          id?: string
+          tema: string
+          texto?: string | null
+        }
+        Update: {
+          criado_em?: string
+          id?: string
+          tema?: string
+          texto?: string | null
+        }
+        Relationships: []
+      }
       equipe_escola: {
         Row: {
           cargo: string
