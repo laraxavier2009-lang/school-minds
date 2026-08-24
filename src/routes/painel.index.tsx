@@ -228,7 +228,7 @@ function PainelPage() {
     <main className="min-h-screen pb-12" style={{ background: "var(--cor-fundo)", fontFamily: "Nunito, system-ui, sans-serif" }}>
       <header
         className="flex items-center justify-between gap-3 px-5 py-4 md:px-8 md:py-5"
-        style={{ background: "#FFFFFF", boxShadow: "0 2px 8px rgba(27, 108, 168, 0.08)" }}
+        style={{ background: "var(--cor-card)", boxShadow: "0 2px 8px rgba(27, 108, 168, 0.08)" }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <div
@@ -250,7 +250,7 @@ function PainelPage() {
         <button
           onClick={() => void sair()}
           className="shrink-0 rounded-lg border px-3 py-2 md:px-4 text-sm font-bold transition hover:opacity-80"
-          style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "#FFFFFF" }}
+          style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "var(--cor-card)" }}
         >
           Sair
         </button>
@@ -459,7 +459,7 @@ function PainelPage() {
                           <button
                             onClick={() => abrirAnotacao(a)}
                             className="rounded-lg border px-2 py-1 text-[11px] font-bold transition hover:opacity-80"
-                            style={{ borderColor: "#C8D2DD", color: "var(--cor-primaria)", background: "#fff" }}
+                            style={{ borderColor: "#C8D2DD", color: "var(--cor-primaria)", background: "var(--cor-card)" }}
                             aria-label="Adicionar anotação interna"
                           >
                             📝 Anotar
@@ -542,7 +542,7 @@ function PainelPage() {
               <button
                 onClick={() => setAnotandoId(null)}
                 className="rounded-lg border px-4 py-2 text-sm font-bold"
-                style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "#fff" }}
+                style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "var(--cor-card)" }}
               >
                 Cancelar
               </button>

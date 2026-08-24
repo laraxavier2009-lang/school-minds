@@ -16,7 +16,7 @@ export function BotaoTema({ icone, label, tema, destaque }: Props) {
         color: 'var(--cor-crise)',
       }
     : {
-        background: '#ffffff',
+        background: "var(--cor-card)",
         borderColor: 'transparent',
         color: 'var(--cor-texto)',
       };
