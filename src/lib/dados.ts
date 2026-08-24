@@ -57,6 +57,35 @@ export async function salvarSessaoTriagem(params: {
   return data.id;
 }
 
+/**
+ * Grava um desabafo totalmente anônimo (sem vínculo com sessão, usuário ou IP).
+ * Texto vazio é gravado como NULL — o preenchimento é opcional.
+ */
+export async function salvarDesabafo(tema: string, texto: string): Promise<boolean> {
+  const limpo = texto.trim();
+  const { error } = await supabase
+    .from("desabafos_anonimos")
+    .insert(limpo.length > 0 ? { tema, texto: limpo } : { tema });
+  return !error;
+}
+
+export interface DesabafoAnonimo {
+  id: string;
+  texto: string;
+  tema: string;
+  criado_em: string;
+}
+
+export async function listarDesabafos(): Promise<DesabafoAnonimo[]> {
+  const { data } = await supabase
+    .from("desabafos_anonimos")
+    .select("id, texto, tema, criado_em")
+    .not("texto", "is", null)
+    .order("criado_em", { ascending: false })
+    .limit(100);
+  return (data ?? []).map((d) => ({ ...d, texto: d.texto ?? "" }));
+}
+
 export interface ContatoApoio {
   id: string;
   nome: string;

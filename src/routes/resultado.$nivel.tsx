@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
+import { salvarDesabafo } from "@/lib/dados";
 import logoBrain from "@/assets/logo-brain.png";
 
 type Search = { tema?: Tema };
@@ -174,6 +175,19 @@ function RespostaMedio({ tema }: { tema?: Tema }) {
 function RespostaGrave({ tema }: { tema?: Tema }) {
   const [mostrarContatos, setMostrarContatos] = useState(false);
   const [desabafo, setDesabafo] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  async function avancar() {
+    if (enviando) return;
+    setEnviando(true);
+    try {
+      await salvarDesabafo(tema ?? "pedir_ajuda", desabafo);
+    } finally {
+      setEnviando(false);
+      setMostrarContatos(true);
+    }
+  }
+
 
   return (
     <main className="px-5 pt-0 pb-10 space-y-4">
@@ -187,7 +201,7 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
       <div className="pt-4 space-y-4">
         <ChatBubble texto="Sinto muito que você está passando por isso. Como sou um robô, preciso garantir sua segurança com ajuda de uma pessoa real." />
 
-        <ChatBubble texto="Eu percebo que você está passando por um momento muito difícil. Se você sentir que ajuda, pode usar o espaço abaixo para desabafar ou escrever como realmente está se sentindo agora. Isso é apenas para você se expressar." />
+        <ChatBubble texto="Sinto muito que você esteja passando por isso. Se quiser, você pode usar o espaço abaixo para desabafar ou escrever o que está sentindo agora. Sua mensagem será salva anonimamente no nosso sistema para ajudar a coordenação a entender as principais dores dos estudantes, mas sua identidade nunca será revelada. Esse espaço é totalmente opcional." />
       </div>
 
       {tema === "pedir_ajuda" && <ConfirmacaoPedidoAjuda prioridade="urgente" />}
@@ -201,21 +215,22 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
             id="desabafo"
             value={desabafo}
             onChange={(e) => setDesabafo(e.target.value)}
-            placeholder="Sinta-se à vontade para escrever aqui... (Este espaço é opcional e o texto não será salvo por questões de sua privacidade)."
-            className="min-h-[140px] w-full resize-none rounded-[12px] border border-[#D1E3F0] bg-white p-4 text-[15px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
+            placeholder="Escreva aqui seu desabafo (opcional)..."
+            className="min-h-[180px] w-full resize-none rounded-[12px] border border-[#D1E3F0] bg-white p-4 text-[16px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
             style={{ color: "var(--cor-texto)" }}
           />
           <p className="text-center text-[12px]" style={{ color: "var(--cor-texto-leve)" }}>
-            Por segurança e sigilo, o que você escreve aqui é apagado assim que a sessão terminar.
+            Seu relato é guardado de forma totalmente anônima, sem qualquer ligação com você.
           </p>
 
           <button
             type="button"
-            onClick={() => setMostrarContatos(true)}
-            className="flex h-[52px] w-full items-center justify-center rounded-xl text-[17px] font-bold text-white transition-opacity hover:opacity-90"
+            disabled={enviando}
+            onClick={() => void avancar()}
+            className="flex h-[52px] w-full items-center justify-center rounded-xl text-[17px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
             style={{ background: "var(--cor-secundaria)" }}
           >
-            Pronto, quero ver os canais de ajuda →
+            {enviando ? "Enviando..." : "Pronto, quero ver os canais de ajuda →"}
           </button>
 
           <button
