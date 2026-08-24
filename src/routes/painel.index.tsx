@@ -16,7 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   atualizarStatusAlerta,
   criarAnotacao,
+  listarDesabafos,
   listarSessoes,
+  type DesabafoAnonimo,
   type SessaoPainel,
   type StatusEnum,
 } from "@/lib/dados";
