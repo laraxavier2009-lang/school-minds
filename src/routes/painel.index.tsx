@@ -72,6 +72,7 @@ function PainelPage() {
       setPerfil({ nome: membro.nome, cargo: membro.cargo });
       setAutorizado(true);
       setAlertas(await listarSessoes());
+      setDesabafos(await listarDesabafos());
     })();
   }, [navigate]);
 
