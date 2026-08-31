@@ -237,5 +237,5 @@
 
 /* Logo legível no modo noturno */
 .dark img[alt*="Saúde Mental"] {
-  filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(0,0,0,0.4));
+  filter: invert(1) hue-rotate(180deg);
 }
