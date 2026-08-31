@@ -19,7 +19,7 @@ function Portal() {
           <img
             src={logoBrain}
             alt="Saúde Mental na Escola"
-            className="mx-auto h-48 w-auto sm:h-56"
+            className="logo-app mx-auto h-48 w-auto sm:h-56"
           />
           <p className="mt-3 text-base" style={{ color: "var(--cor-texto-leve)" }}>
             Escolha como deseja acessar
