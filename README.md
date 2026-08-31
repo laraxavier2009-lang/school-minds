@@ -1,5 +1,7 @@
 # School Minds
 
+# Teste de Commit
+
 # PROMPT DE DESENVOLVIMENTO COMPLETO — CHATBOT SAÚDE MENTAL NA ESCOLA
 ## Para usar no Lovable (lovable.dev)
 
