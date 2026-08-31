@@ -236,6 +236,6 @@
 .animate-pulse-alert { animation: pulseAlert 2s ease-in-out infinite; }
 
 /* Logo legível no modo noturno */
-.dark img[alt*="Saúde Mental"] {
+.dark .logo-app {
   filter: invert(1) hue-rotate(180deg);
 }

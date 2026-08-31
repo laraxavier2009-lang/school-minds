@@ -28,7 +28,7 @@ function Privacidade() {
     <main className="flex min-h-screen flex-col items-center px-6 pt-10 pb-8">
       <div className="w-full space-y-6">
         <div className="animate-fade-in-up flex flex-col items-center text-center" style={{ animationDelay: "0ms" }}>
-          <img src={logoBrain} alt="Saúde Mental na Escola" className="h-40 w-auto sm:h-48" />
+          <img src={logoBrain} alt="Saúde Mental na Escola" className="logo-app h-40 w-auto sm:h-48" />
         </div>
         <div className="animate-fade-in-up text-center" style={{ animationDelay: "100ms" }}>
           <p className="text-base" style={{ color: "var(--cor-texto-leve)" }}>

@@ -105,7 +105,7 @@ function RespostaMedio({ tema }: { tema?: Tema }) {
   return (
     <main className="px-5 pt-6 pb-10 space-y-5">
       <div className="flex justify-center">
-        <img src={logoBrain} alt="Saúde Mental na Escola" className="h-28 w-auto" />
+        <img src={logoBrain} alt="Saúde Mental na Escola" className="logo-app h-28 w-auto" />
       </div>
       <h1 className="text-center text-[22px] font-extrabold" style={{ color: "var(--cor-texto)" }}>
         Percebo que tem sido difícil
