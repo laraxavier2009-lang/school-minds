@@ -117,13 +117,22 @@ export interface SessaoPainel {
 export async function listarSessoes(): Promise<SessaoPainel[]> {
   const { data, error } = await supabase
     .from("registros")
-    .select("id, tema, nivel_risco, criado_em, alertas(id, status, anotacoes(id, texto, criado_em))")
+    .select(
+      "id, tema, nivel_risco, criado_em, alertas(id, status, anotacoes(id, texto, criado_em))",
+    )
     .order("criado_em", { ascending: false })
     .limit(200);
   if (error || !data) return [];
 
   return data.map((r) => {
-    const alerta = (r.alertas as Array<{ id: string; status: StatusEnum; anotacoes: Array<{ id: string; texto: string; criado_em: string }> }> | null)?.[0] ?? null;
+    const alerta =
+      (
+        r.alertas as Array<{
+          id: string;
+          status: StatusEnum;
+          anotacoes: Array<{ id: string; texto: string; criado_em: string }>;
+        }> | null
+      )?.[0] ?? null;
     const notas = alerta?.anotacoes ?? [];
     const ordenadas = [...notas].sort((a, b) => (a.criado_em < b.criado_em ? 1 : -1));
     return {

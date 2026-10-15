@@ -80,10 +80,16 @@ export function ProtectedRoute({ children }: Props) {
 
   if (verificando || !autorizado) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-3" style={{ color: "var(--cor-texto-leve)" }}>
+      <main
+        className="flex min-h-screen flex-col items-center justify-center gap-3"
+        style={{ color: "var(--cor-texto-leve)" }}
+      >
         <div
           className="h-10 w-10 animate-spin rounded-full border-4 border-solid"
-          style={{ borderColor: "#E0E6EE", borderTopColor: "var(--cor-primaria, #1B6CA8)" }}
+          style={{
+            borderColor: "var(--cor-borda-leve)",
+            borderTopColor: "var(--cor-primaria, #1B6CA8)",
+          }}
           role="status"
           aria-label="Verificando acesso"
         />

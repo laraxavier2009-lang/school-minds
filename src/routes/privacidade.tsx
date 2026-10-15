@@ -7,7 +7,11 @@ export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
       { title: "Saúde Mental na Escola — Estou aqui para te ouvir" },
-      { name: "description", content: "Espaço de acolhimento e escuta inicial para estudantes do ensino médio. Confidencial e seguro." },
+      {
+        name: "description",
+        content:
+          "Espaço de acolhimento e escuta inicial para estudantes do ensino médio. Confidencial e seguro.",
+      },
     ],
   }),
   component: Privacidade,
@@ -27,8 +31,15 @@ function Privacidade() {
   return (
     <main className="flex min-h-screen flex-col items-center px-6 pt-10 pb-8">
       <div className="w-full space-y-6">
-        <div className="animate-fade-in-up flex flex-col items-center text-center" style={{ animationDelay: "0ms" }}>
-          <img src={logoBrain} alt="Saúde Mental na Escola" className="logo-app h-40 w-auto sm:h-48" />
+        <div
+          className="animate-fade-in-up flex flex-col items-center text-center"
+          style={{ animationDelay: "0ms" }}
+        >
+          <img
+            src={logoBrain}
+            alt="Saúde Mental na Escola"
+            className="logo-app h-40 w-auto sm:h-48"
+          />
         </div>
         <div className="animate-fade-in-up text-center" style={{ animationDelay: "100ms" }}>
           <p className="text-base" style={{ color: "var(--cor-texto-leve)" }}>
@@ -47,8 +58,12 @@ function Privacidade() {
           <p className="text-[16px] font-bold" style={{ color: "var(--cor-texto)" }}>
             🔒 Tudo o que conversarmos aqui é seguro e confidencial.
           </p>
-          <p className="mt-3 text-[15px] leading-relaxed" style={{ color: "var(--cor-texto-leve)" }}>
-            Mas atenção: eu sou um robô. Não substituo psicólogo, não faço diagnóstico e não sou canal de emergência.
+          <p
+            className="mt-3 text-[15px] leading-relaxed"
+            style={{ color: "var(--cor-texto-leve)" }}
+          >
+            Mas atenção: eu sou um robô. Não substituo psicólogo, não faço diagnóstico e não sou
+            canal de emergência.
           </p>
         </div>
 
@@ -63,8 +78,12 @@ function Privacidade() {
           <p className="text-[15px] font-bold" style={{ color: "var(--cor-crise)" }}>
             🚨 Precisa de ajuda urgente agora?
           </p>
-          <p className="mt-2 text-[14px] leading-relaxed" style={{ color: "var(--cor-texto-leve)" }}>
-            {cvv?.descricao ?? "O CVV (Centro de Valorização da Vida) atende 24h, é gratuito e sigiloso."}
+          <p
+            className="mt-2 text-[14px] leading-relaxed"
+            style={{ color: "var(--cor-texto-leve)" }}
+          >
+            {cvv?.descricao ??
+              "O CVV (Centro de Valorização da Vida) atende 24h, é gratuito e sigiloso."}
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <a
@@ -79,7 +98,11 @@ function Privacidade() {
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-11 flex-1 items-center justify-center rounded-xl border-2 text-sm font-bold transition-opacity hover:opacity-80"
-              style={{ borderColor: "var(--cor-crise)", color: "var(--cor-crise)", background: "var(--cor-card)" }}
+              style={{
+                borderColor: "var(--cor-crise)",
+                color: "var(--cor-crise)",
+                background: "var(--cor-card)",
+              }}
             >
               cvv.org.br ↗
             </a>
@@ -108,7 +131,10 @@ function Privacidade() {
           </button>
         </div>
 
-        <p className="animate-fade-in-up text-center text-[13px]" style={{ color: "var(--cor-texto-leve)", animationDelay: "400ms" }}>
+        <p
+          className="animate-fade-in-up text-center text-[13px]"
+          style={{ color: "var(--cor-texto-leve)", animationDelay: "400ms" }}
+        >
           Nenhuma resposta sua fica salva.
         </p>
       </div>

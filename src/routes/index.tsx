@@ -5,7 +5,10 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Saúde Mental na Escola — Portal" },
-      { name: "description", content: "Selecione o seu perfil de acesso: estudante ou equipe escolar." },
+      {
+        name: "description",
+        content: "Selecione o seu perfil de acesso: estudante ou equipe escolar.",
+      },
     ],
   }),
   component: Portal,
@@ -70,7 +73,10 @@ function Portal() {
           </div>
         </Link>
 
-        <p className="animate-fade-in-up text-center text-[13px]" style={{ color: "var(--cor-texto-leve)", animationDelay: "300ms" }}>
+        <p
+          className="animate-fade-in-up text-center text-[13px]"
+          style={{ color: "var(--cor-texto-leve)", animationDelay: "300ms" }}
+        >
           Nenhum dado pessoal do estudante é armazenado.
         </p>
       </div>

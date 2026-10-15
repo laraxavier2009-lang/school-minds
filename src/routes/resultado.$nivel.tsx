@@ -77,7 +77,7 @@ function ConfirmacaoPedidoAjuda({ prioridade }: { prioridade: "alta" | "urgente"
     <div
       className="animate-fade-in-up rounded-2xl border-2 p-5"
       style={{
-        background: "linear-gradient(135deg, #E8F4FD 0%, #FFF3F3 100%)",
+        background: "linear-gradient(135deg, var(--cor-fundo-leve) 0%, var(--cor-card) 100%)",
         borderColor: prioridade === "urgente" ? "var(--cor-crise)" : "var(--cor-primaria)",
       }}
     >
@@ -116,7 +116,10 @@ function RespostaMedio({ tema }: { tema?: Tema }) {
 
       <div
         className="rounded-2xl border-l-4 bg-white p-5"
-        style={{ borderLeftColor: "var(--cor-alerta)", boxShadow: "0 2px 12px rgba(230, 126, 34, 0.10)" }}
+        style={{
+          borderLeftColor: "var(--cor-alerta)",
+          boxShadow: "0 2px 12px rgba(230, 126, 34, 0.10)",
+        }}
       >
         <div className="flex items-start gap-3">
           <span className="text-2xl">🏫</span>
@@ -133,7 +136,10 @@ function RespostaMedio({ tema }: { tema?: Tema }) {
 
       <div
         className="rounded-2xl border-l-4 bg-white p-5"
-        style={{ borderLeftColor: "var(--cor-primaria)", boxShadow: "0 2px 12px rgba(27, 108, 168, 0.10)" }}
+        style={{
+          borderLeftColor: "var(--cor-primaria)",
+          boxShadow: "0 2px 12px rgba(27, 108, 168, 0.10)",
+        }}
       >
         <div className="flex items-start gap-3">
           <span className="text-2xl">👩‍🏫</span>
@@ -187,7 +193,6 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
       setMostrarContatos(true);
     }
   }
-
 
   return (
     <main className="px-5 pt-0 pb-10 space-y-4">
@@ -281,14 +286,16 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
                   Fale com um adulto agora
                 </h3>
                 <p className="mt-1 text-sm" style={{ color: "var(--cor-texto-leve)" }}>
-                  Procure um professor, coordenador ou qualquer adulto de confiança na escola agora mesmo.
+                  Procure um professor, coordenador ou qualquer adulto de confiança na escola agora
+                  mesmo.
                 </p>
               </div>
             </div>
           </div>
 
           <p className="text-center text-[13px]" style={{ color: "var(--cor-texto-leve)" }}>
-            A equipe da escola foi avisada de que um aluno precisa de apoio. Você não será identificado(a).
+            A equipe da escola foi avisada de que um aluno precisa de apoio. Você não será
+            identificado(a).
           </p>
 
           <Link
@@ -325,7 +332,7 @@ function RespiracaoCard() {
     <div
       className="rounded-2xl p-5 text-center"
       style={{
-        background: "linear-gradient(135deg, #E8F4FD 0%, #E8F8EF 100%)",
+        background: "linear-gradient(135deg, var(--cor-fundo-leve) 0%, var(--cor-card) 100%)",
       }}
     >
       <h3 className="text-lg font-extrabold" style={{ color: "var(--cor-primaria)" }}>
@@ -343,7 +350,10 @@ function RespiracaoCard() {
           {labels[fase]}
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 text-xs font-semibold" style={{ color: "var(--cor-texto-leve)" }}>
+      <div
+        className="grid grid-cols-3 gap-2 text-xs font-semibold"
+        style={{ color: "var(--cor-texto-leve)" }}
+      >
         <span>Inspira · 4s</span>
         <span>Segura · 4s</span>
         <span>Solta · 4s</span>
@@ -353,10 +363,15 @@ function RespiracaoCard() {
 }
 
 const DICAS_POR_TEMA: Record<Tema, string> = {
-  ansiedade: "Diminua a rotação: ouça uma música calma, escreva o que está sentindo ou caminhe 5 minutos em silêncio.",
-  tristeza: "Permita-se sentir, mas também busque pequenos prazeres: um banho quente, conversar com alguém ou um filme leve.",
-  bullying: "Você não merece ser tratado(a) assim. Anote o que aconteceu e fale com um adulto de confiança quando puder.",
+  ansiedade:
+    "Diminua a rotação: ouça uma música calma, escreva o que está sentindo ou caminhe 5 minutos em silêncio.",
+  tristeza:
+    "Permita-se sentir, mas também busque pequenos prazeres: um banho quente, conversar com alguém ou um filme leve.",
+  bullying:
+    "Você não merece ser tratado(a) assim. Anote o que aconteceu e fale com um adulto de confiança quando puder.",
   luto: "Não há tempo certo para a dor. Conversar sobre quem você perdeu, mesmo que doa, ajuda a guardar boas memórias.",
-  estresse: "Faça uma pausa real de tela e tarefas. Beba água, alongue o corpo e respire fundo por 1 minuto.",
-  pedir_ajuda: "Reconhecer que precisa de ajuda já é um passo enorme. Procure alguém da escola para conversar nos próximos dias.",
+  estresse:
+    "Faça uma pausa real de tela e tarefas. Beba água, alongue o corpo e respire fundo por 1 minuto.",
+  pedir_ajuda:
+    "Reconhecer que precisa de ajuda já é um passo enorme. Procure alguém da escola para conversar nos próximos dias.",
 };

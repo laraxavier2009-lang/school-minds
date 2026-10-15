@@ -5,21 +5,14 @@ import { BotaoOpcao } from "@/components/BotaoOpcao";
 import { ProgressoPerguntas } from "@/components/ProgressoPerguntas";
 import { RespiracaoCard } from "@/components/RespiracaoCard";
 import { salvarSessaoTriagem, type RespostaSessao } from "@/lib/dados";
-import {
-  PERGUNTAS_POR_TEMA,
-  LABELS_TEMA,
-  calcularNivel,
-  isTema,
-} from "@/lib/triagem";
+import { PERGUNTAS_POR_TEMA, LABELS_TEMA, calcularNivel, isTema } from "@/lib/triagem";
 
 export const Route = createFileRoute("/triagem/$tema")({
   beforeLoad: ({ params }) => {
     if (!isTema(params.tema)) throw notFound();
   },
   head: ({ params }) => ({
-    meta: [
-      { title: `Triagem — ${isTema(params.tema) ? LABELS_TEMA[params.tema] : ""}` },
-    ],
+    meta: [{ title: `Triagem — ${isTema(params.tema) ? LABELS_TEMA[params.tema] : ""}` }],
   }),
   component: Perguntas,
 });
@@ -27,14 +20,14 @@ export const Route = createFileRoute("/triagem/$tema")({
 function Perguntas() {
   const { tema } = Route.useParams();
   const navigate = useNavigate();
-
-  if (!isTema(tema)) return null;
-  const perguntas = useMemo(() => PERGUNTAS_POR_TEMA[tema], [tema]);
+  const perguntas = useMemo(() => (isTema(tema) ? PERGUNTAS_POR_TEMA[tema] : []), [tema]);
 
   const [idx, setIdx] = useState(0);
   const [pesos, setPesos] = useState<number[]>([]);
   const [respostas, setRespostas] = useState<RespostaSessao[]>([]);
   const [respirou, setRespirou] = useState(false);
+
+  if (!isTema(tema)) return null;
 
   const finalizar = (todos: number[], todasRespostas: RespostaSessao[]) => {
     const nivel = calcularNivel(todos);

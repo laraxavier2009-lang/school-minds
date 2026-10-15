@@ -98,10 +98,7 @@ function LoginPainel() {
 
         <form onSubmit={entrar} className="mt-6 space-y-4">
           <label className="block">
-            <span
-              className="text-sm font-bold"
-              style={{ color: "var(--cor-texto)" }}
-            >
+            <span className="text-sm font-bold" style={{ color: "var(--cor-texto)" }}>
               E-mail
             </span>
             <input
@@ -112,17 +109,14 @@ function LoginPainel() {
               autoComplete="email"
               className="mt-1 h-12 w-full rounded-xl border bg-white px-3 text-base outline-none focus:ring-2"
               style={{
-                borderColor: "#C8D2DD",
+                borderColor: "var(--cor-borda-clara)",
                 color: "var(--cor-texto)",
                 fontSize: 16,
               }}
             />
           </label>
           <label className="block">
-            <span
-              className="text-sm font-bold"
-              style={{ color: "var(--cor-texto)" }}
-            >
+            <span className="text-sm font-bold" style={{ color: "var(--cor-texto)" }}>
               Senha
             </span>
             <input
@@ -133,7 +127,7 @@ function LoginPainel() {
               autoComplete="current-password"
               className="mt-1 h-12 w-full rounded-xl border bg-white px-3 text-base outline-none focus:ring-2"
               style={{
-                borderColor: "#C8D2DD",
+                borderColor: "var(--cor-borda-clara)",
                 color: "var(--cor-texto)",
                 fontSize: 16,
               }}

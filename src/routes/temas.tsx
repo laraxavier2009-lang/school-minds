@@ -7,7 +7,10 @@ export const Route = createFileRoute("/temas")({
   head: () => ({
     meta: [
       { title: "Escolha um tema — Saúde Mental na Escola" },
-      { name: "description", content: "Escolha o tema que melhor descreve o que você está sentindo." },
+      {
+        name: "description",
+        content: "Escolha o tema que melhor descreve o que você está sentindo.",
+      },
     ],
   }),
   component: MenuTemas,
@@ -37,7 +40,12 @@ function MenuTemas() {
         <BotaoTema icone={ICONES_TEMA.bullying} label={LABELS_TEMA.bullying} tema="bullying" />
         <BotaoTema icone={ICONES_TEMA.luto} label={LABELS_TEMA.luto} tema="luto" />
         <BotaoTema icone={ICONES_TEMA.estresse} label={LABELS_TEMA.estresse} tema="estresse" />
-        <BotaoTema icone={ICONES_TEMA.pedir_ajuda} label={LABELS_TEMA.pedir_ajuda} tema="pedir_ajuda" destaque />
+        <BotaoTema
+          icone={ICONES_TEMA.pedir_ajuda}
+          label={LABELS_TEMA.pedir_ajuda}
+          tema="pedir_ajuda"
+          destaque
+        />
       </div>
     </main>
   );

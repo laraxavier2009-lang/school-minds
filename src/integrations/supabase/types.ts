@@ -1,439 +1,409 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       alertas: {
         Row: {
-          atualizado_em: string
-          criado_em: string
-          id: string
-          prazo_dias: number
-          registro_id: string
-          status: Database["public"]["Enums"]["status_enum"]
-        }
+          atualizado_em: string;
+          criado_em: string;
+          id: string;
+          prazo_dias: number;
+          registro_id: string;
+          status: Database["public"]["Enums"]["status_enum"];
+        };
         Insert: {
-          atualizado_em?: string
-          criado_em?: string
-          id?: string
-          prazo_dias?: number
-          registro_id: string
-          status?: Database["public"]["Enums"]["status_enum"]
-        }
+          atualizado_em?: string;
+          criado_em?: string;
+          id?: string;
+          prazo_dias?: number;
+          registro_id: string;
+          status?: Database["public"]["Enums"]["status_enum"];
+        };
         Update: {
-          atualizado_em?: string
-          criado_em?: string
-          id?: string
-          prazo_dias?: number
-          registro_id?: string
-          status?: Database["public"]["Enums"]["status_enum"]
-        }
+          atualizado_em?: string;
+          criado_em?: string;
+          id?: string;
+          prazo_dias?: number;
+          registro_id?: string;
+          status?: Database["public"]["Enums"]["status_enum"];
+        };
         Relationships: [
           {
-            foreignKeyName: "alertas_registro_id_fkey"
-            columns: ["registro_id"]
-            isOneToOne: false
-            referencedRelation: "registros"
-            referencedColumns: ["id"]
+            foreignKeyName: "alertas_registro_id_fkey";
+            columns: ["registro_id"];
+            isOneToOne: false;
+            referencedRelation: "registros";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       anotacoes: {
         Row: {
-          alerta_id: string
-          atualizado_em: string
-          autor_id: string
-          criado_em: string
-          id: string
-          texto: string
-        }
+          alerta_id: string;
+          atualizado_em: string;
+          autor_id: string;
+          criado_em: string;
+          id: string;
+          texto: string;
+        };
         Insert: {
-          alerta_id: string
-          atualizado_em?: string
-          autor_id: string
-          criado_em?: string
-          id?: string
-          texto: string
-        }
+          alerta_id: string;
+          atualizado_em?: string;
+          autor_id: string;
+          criado_em?: string;
+          id?: string;
+          texto: string;
+        };
         Update: {
-          alerta_id?: string
-          atualizado_em?: string
-          autor_id?: string
-          criado_em?: string
-          id?: string
-          texto?: string
-        }
+          alerta_id?: string;
+          atualizado_em?: string;
+          autor_id?: string;
+          criado_em?: string;
+          id?: string;
+          texto?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "anotacoes_alerta_id_fkey"
-            columns: ["alerta_id"]
-            isOneToOne: false
-            referencedRelation: "alertas"
-            referencedColumns: ["id"]
+            foreignKeyName: "anotacoes_alerta_id_fkey";
+            columns: ["alerta_id"];
+            isOneToOne: false;
+            referencedRelation: "alertas";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       contatos_apoio: {
         Row: {
-          ativo: boolean
-          atualizado_em: string
-          criado_em: string
-          descricao: string | null
-          id: string
-          nome: string
-          ordem: number
-          site: string | null
-          telefone: string | null
-        }
+          ativo: boolean;
+          atualizado_em: string;
+          criado_em: string;
+          descricao: string | null;
+          id: string;
+          nome: string;
+          ordem: number;
+          site: string | null;
+          telefone: string | null;
+        };
         Insert: {
-          ativo?: boolean
-          atualizado_em?: string
-          criado_em?: string
-          descricao?: string | null
-          id?: string
-          nome: string
-          ordem?: number
-          site?: string | null
-          telefone?: string | null
-        }
+          ativo?: boolean;
+          atualizado_em?: string;
+          criado_em?: string;
+          descricao?: string | null;
+          id?: string;
+          nome: string;
+          ordem?: number;
+          site?: string | null;
+          telefone?: string | null;
+        };
         Update: {
-          ativo?: boolean
-          atualizado_em?: string
-          criado_em?: string
-          descricao?: string | null
-          id?: string
-          nome?: string
-          ordem?: number
-          site?: string | null
-          telefone?: string | null
-        }
-        Relationships: []
-      }
+          ativo?: boolean;
+          atualizado_em?: string;
+          criado_em?: string;
+          descricao?: string | null;
+          id?: string;
+          nome?: string;
+          ordem?: number;
+          site?: string | null;
+          telefone?: string | null;
+        };
+        Relationships: [];
+      };
       desabafos_anonimos: {
         Row: {
-          criado_em: string
-          id: string
-          tema: string
-          texto: string | null
-        }
+          criado_em: string;
+          id: string;
+          tema: string;
+          texto: string | null;
+        };
         Insert: {
-          criado_em?: string
-          id?: string
-          tema: string
-          texto?: string | null
-        }
+          criado_em?: string;
+          id?: string;
+          tema: string;
+          texto?: string | null;
+        };
         Update: {
-          criado_em?: string
-          id?: string
-          tema?: string
-          texto?: string | null
-        }
-        Relationships: []
-      }
+          criado_em?: string;
+          id?: string;
+          tema?: string;
+          texto?: string | null;
+        };
+        Relationships: [];
+      };
       equipe_escola: {
         Row: {
-          cargo: string
-          criado_em: string
-          email: string | null
-          id: string
-          nome: string
-          user_id: string
-        }
+          cargo: string;
+          criado_em: string;
+          email: string | null;
+          id: string;
+          nome: string;
+          user_id: string;
+        };
         Insert: {
-          cargo: string
-          criado_em?: string
-          email?: string | null
-          id?: string
-          nome: string
-          user_id: string
-        }
+          cargo: string;
+          criado_em?: string;
+          email?: string | null;
+          id?: string;
+          nome: string;
+          user_id: string;
+        };
         Update: {
-          cargo?: string
-          criado_em?: string
-          email?: string | null
-          id?: string
-          nome?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          cargo?: string;
+          criado_em?: string;
+          email?: string | null;
+          id?: string;
+          nome?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       historico_status: {
         Row: {
-          alerta_id: string
-          autor_id: string | null
-          criado_em: string
-          id: string
-          status_anterior: Database["public"]["Enums"]["status_enum"] | null
-          status_novo: Database["public"]["Enums"]["status_enum"]
-        }
+          alerta_id: string;
+          autor_id: string | null;
+          criado_em: string;
+          id: string;
+          status_anterior: Database["public"]["Enums"]["status_enum"] | null;
+          status_novo: Database["public"]["Enums"]["status_enum"];
+        };
         Insert: {
-          alerta_id: string
-          autor_id?: string | null
-          criado_em?: string
-          id?: string
-          status_anterior?: Database["public"]["Enums"]["status_enum"] | null
-          status_novo: Database["public"]["Enums"]["status_enum"]
-        }
+          alerta_id: string;
+          autor_id?: string | null;
+          criado_em?: string;
+          id?: string;
+          status_anterior?: Database["public"]["Enums"]["status_enum"] | null;
+          status_novo: Database["public"]["Enums"]["status_enum"];
+        };
         Update: {
-          alerta_id?: string
-          autor_id?: string | null
-          criado_em?: string
-          id?: string
-          status_anterior?: Database["public"]["Enums"]["status_enum"] | null
-          status_novo?: Database["public"]["Enums"]["status_enum"]
-        }
+          alerta_id?: string;
+          autor_id?: string | null;
+          criado_em?: string;
+          id?: string;
+          status_anterior?: Database["public"]["Enums"]["status_enum"] | null;
+          status_novo?: Database["public"]["Enums"]["status_enum"];
+        };
         Relationships: [
           {
-            foreignKeyName: "historico_status_alerta_id_fkey"
-            columns: ["alerta_id"]
-            isOneToOne: false
-            referencedRelation: "alertas"
-            referencedColumns: ["id"]
+            foreignKeyName: "historico_status_alerta_id_fkey";
+            columns: ["alerta_id"];
+            isOneToOne: false;
+            referencedRelation: "alertas";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       registros: {
         Row: {
-          criado_em: string
-          id: string
-          nivel_risco: Database["public"]["Enums"]["nivel_enum"]
-          origem: string
-          pediu_ajuda: boolean
-          pontuacao_total: number
-          tema: Database["public"]["Enums"]["tema_enum"]
-        }
+          criado_em: string;
+          id: string;
+          nivel_risco: Database["public"]["Enums"]["nivel_enum"];
+          origem: string;
+          pediu_ajuda: boolean;
+          pontuacao_total: number;
+          tema: Database["public"]["Enums"]["tema_enum"];
+        };
         Insert: {
-          criado_em?: string
-          id?: string
-          nivel_risco: Database["public"]["Enums"]["nivel_enum"]
-          origem?: string
-          pediu_ajuda?: boolean
-          pontuacao_total?: number
-          tema: Database["public"]["Enums"]["tema_enum"]
-        }
+          criado_em?: string;
+          id?: string;
+          nivel_risco: Database["public"]["Enums"]["nivel_enum"];
+          origem?: string;
+          pediu_ajuda?: boolean;
+          pontuacao_total?: number;
+          tema: Database["public"]["Enums"]["tema_enum"];
+        };
         Update: {
-          criado_em?: string
-          id?: string
-          nivel_risco?: Database["public"]["Enums"]["nivel_enum"]
-          origem?: string
-          pediu_ajuda?: boolean
-          pontuacao_total?: number
-          tema?: Database["public"]["Enums"]["tema_enum"]
-        }
-        Relationships: []
-      }
+          criado_em?: string;
+          id?: string;
+          nivel_risco?: Database["public"]["Enums"]["nivel_enum"];
+          origem?: string;
+          pediu_ajuda?: boolean;
+          pontuacao_total?: number;
+          tema?: Database["public"]["Enums"]["tema_enum"];
+        };
+        Relationships: [];
+      };
       respostas: {
         Row: {
-          criado_em: string
-          id: string
-          opcao: string
-          ordem: number
-          pergunta: string
-          peso: number
-          registro_id: string
-        }
+          criado_em: string;
+          id: string;
+          opcao: string;
+          ordem: number;
+          pergunta: string;
+          peso: number;
+          registro_id: string;
+        };
         Insert: {
-          criado_em?: string
-          id?: string
-          opcao: string
-          ordem?: number
-          pergunta: string
-          peso?: number
-          registro_id: string
-        }
+          criado_em?: string;
+          id?: string;
+          opcao: string;
+          ordem?: number;
+          pergunta: string;
+          peso?: number;
+          registro_id: string;
+        };
         Update: {
-          criado_em?: string
-          id?: string
-          opcao?: string
-          ordem?: number
-          pergunta?: string
-          peso?: number
-          registro_id?: string
-        }
+          criado_em?: string;
+          id?: string;
+          opcao?: string;
+          ordem?: number;
+          pergunta?: string;
+          peso?: number;
+          registro_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "respostas_registro_id_fkey"
-            columns: ["registro_id"]
-            isOneToOne: false
-            referencedRelation: "registros"
-            referencedColumns: ["id"]
+            foreignKeyName: "respostas_registro_id_fkey";
+            columns: ["registro_id"];
+            isOneToOne: false;
+            referencedRelation: "registros";
+            referencedColumns: ["id"];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      nivel_enum: "leve" | "medio" | "grave"
-      status_enum:
-        | "pendente"
-        | "em_atendimento"
-        | "concluido"
-        | "nao_localizado"
-      tema_enum:
-        | "ansiedade"
-        | "tristeza"
-        | "bullying"
-        | "luto"
-        | "estresse"
-        | "pedir_ajuda"
-    }
+      nivel_enum: "leve" | "medio" | "grave";
+      status_enum: "pendente" | "em_atendimento" | "concluido" | "nao_localizado";
+      tema_enum: "ansiedade" | "tristeza" | "bullying" | "luto" | "estresse" | "pedir_ajuda";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
     Enums: {
       nivel_enum: ["leve", "medio", "grave"],
-      status_enum: [
-        "pendente",
-        "em_atendimento",
-        "concluido",
-        "nao_localizado",
-      ],
-      tema_enum: [
-        "ansiedade",
-        "tristeza",
-        "bullying",
-        "luto",
-        "estresse",
-        "pedir_ajuda",
-      ],
+      status_enum: ["pendente", "em_atendimento", "concluido", "nao_localizado"],
+      tema_enum: ["ansiedade", "tristeza", "bullying", "luto", "estresse", "pedir_ajuda"],
     },
   },
-} as const
+} as const;

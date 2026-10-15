@@ -22,7 +22,9 @@ export function RespiracaoCard({ compact = false }: { compact?: boolean }) {
   return (
     <div
       className="rounded-2xl p-5 text-center"
-      style={{ background: "linear-gradient(135deg, #E8F4FD 0%, #E8F8EF 100%)" }}
+      style={{
+        background: "linear-gradient(135deg, var(--cor-fundo-leve) 0%, var(--cor-card) 100%)",
+      }}
     >
       <h3 className="text-base font-extrabold" style={{ color: "var(--cor-primaria)" }}>
         🫁 Respira comigo antes de começar
@@ -44,7 +46,10 @@ export function RespiracaoCard({ compact = false }: { compact?: boolean }) {
           {labels[fase]}
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 text-xs font-semibold" style={{ color: "var(--cor-texto-leve)" }}>
+      <div
+        className="grid grid-cols-3 gap-2 text-xs font-semibold"
+        style={{ color: "var(--cor-texto-leve)" }}
+      >
         <span>Inspira · 4s</span>
         <span>Segura · 4s</span>
         <span>Solta · 4s</span>

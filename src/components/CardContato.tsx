@@ -31,10 +31,10 @@ export function CardContato({
           {icone}
         </span>
         <div className="flex-1">
-          <h3 className="text-lg font-extrabold" style={{ color: 'var(--cor-texto)' }}>
+          <h3 className="text-lg font-extrabold" style={{ color: "var(--cor-texto)" }}>
             {titulo}
           </h3>
-          <p className="mt-1 text-sm" style={{ color: 'var(--cor-texto-leve)' }}>
+          <p className="mt-1 text-sm" style={{ color: "var(--cor-texto-leve)" }}>
             {subtitulo}
           </p>
           {numero && (
@@ -50,7 +50,7 @@ export function CardContato({
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-bold text-white transition-opacity hover:opacity-90"
           style={{ background: corDestaque, minHeight: 52 }}
         >
-          📞 {textoBotao ?? 'Ligar agora'}
+          📞 {textoBotao ?? "Ligar agora"}
         </a>
       )}
     </div>

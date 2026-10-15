@@ -76,7 +76,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Saúde Mental na Escola — Acolhimento" },
-      { name: "description", content: "Chatbot educacional de acolhimento e triagem inicial para estudantes." },
+      {
+        name: "description",
+        content: "Chatbot educacional de acolhimento e triagem inicial para estudantes.",
+      },
       { property: "og:title", content: "Saúde Mental na Escola" },
       { property: "og:description", content: "Espaço seguro de escuta para estudantes." },
       { property: "og:type", content: "website" },

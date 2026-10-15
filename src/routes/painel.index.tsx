@@ -28,7 +28,14 @@ export const Route = createFileRoute("/painel/")({
   component: PainelPage,
 });
 
-const TEMAS_TODOS: Tema[] = ["ansiedade", "tristeza", "bullying", "luto", "estresse", "pedir_ajuda"];
+const TEMAS_TODOS: Tema[] = [
+  "ansiedade",
+  "tristeza",
+  "bullying",
+  "luto",
+  "estresse",
+  "pedir_ajuda",
+];
 
 const LABELS_CARGO: Record<string, string> = {
   gestor: "Gestor(a)",
@@ -116,7 +123,12 @@ function PainelPage() {
 
   const grafico = useMemo(() => {
     const counts: Record<Tema, number> = {
-      ansiedade: 0, tristeza: 0, bullying: 0, luto: 0, estresse: 0, pedir_ajuda: 0,
+      ansiedade: 0,
+      tristeza: 0,
+      bullying: 0,
+      luto: 0,
+      estresse: 0,
+      pedir_ajuda: 0,
     };
     for (const a of alertas) counts[a.tema]++;
     const max = Math.max(1, ...Object.values(counts));
@@ -141,7 +153,9 @@ function PainelPage() {
       toast.error("Não foi possível atualizar o status.");
       return;
     }
-    setAlertas((prev) => prev.map((a) => (a.registro_id === sessao.registro_id ? { ...a, status } : a)));
+    setAlertas((prev) =>
+      prev.map((a) => (a.registro_id === sessao.registro_id ? { ...a, status } : a)),
+    );
     toast.success("Status atualizado");
   }
 
@@ -210,10 +224,16 @@ function PainelPage() {
 
   if (autorizado === null) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-3" style={{ color: "var(--cor-texto-leve)" }}>
+      <main
+        className="flex min-h-screen flex-col items-center justify-center gap-3"
+        style={{ color: "var(--cor-texto-leve)" }}
+      >
         <div
           className="h-10 w-10 animate-spin rounded-full border-4 border-solid"
-          style={{ borderColor: "#E0E6EE", borderTopColor: "var(--cor-primaria, #1B6CA8)" }}
+          style={{
+            borderColor: "var(--cor-borda-leve)",
+            borderTopColor: "var(--cor-primaria, #1B6CA8)",
+          }}
           role="status"
           aria-label="Carregando painel"
         />
@@ -225,7 +245,10 @@ function PainelPage() {
   if (!autorizado) return null;
 
   return (
-    <main className="min-h-screen pb-12" style={{ background: "var(--cor-fundo)", fontFamily: "Nunito, system-ui, sans-serif" }}>
+    <main
+      className="min-h-screen pb-12"
+      style={{ background: "var(--cor-fundo)", fontFamily: "Nunito, system-ui, sans-serif" }}
+    >
       <header
         className="flex items-center justify-between gap-3 px-5 py-4 md:px-8 md:py-5"
         style={{ background: "var(--cor-card)", boxShadow: "0 2px 8px rgba(27, 108, 168, 0.08)" }}
@@ -239,18 +262,30 @@ function PainelPage() {
             SM
           </div>
           <div className="min-w-0">
-            <h1 className="truncate text-base md:text-xl font-extrabold" style={{ color: "var(--cor-primaria)", lineHeight: 1.15 }}>
+            <h1
+              className="truncate text-base md:text-xl font-extrabold"
+              style={{ color: "var(--cor-primaria)", lineHeight: 1.15 }}
+            >
               Saúde Mental na Escola
             </h1>
-            <p className="truncate text-[11px] md:text-xs font-semibold" style={{ color: "var(--cor-texto-leve)" }}>
-              {perfil ? `${perfil.nome} • ${LABELS_CARGO[perfil.cargo] ?? perfil.cargo}` : "Painel de Gestão Escolar"}
+            <p
+              className="truncate text-[11px] md:text-xs font-semibold"
+              style={{ color: "var(--cor-texto-leve)" }}
+            >
+              {perfil
+                ? `${perfil.nome} • ${LABELS_CARGO[perfil.cargo] ?? perfil.cargo}`
+                : "Painel de Gestão Escolar"}
             </p>
           </div>
         </div>
         <button
           onClick={() => void sair()}
           className="shrink-0 rounded-lg border px-3 py-2 md:px-4 text-sm font-bold transition hover:opacity-80"
-          style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "var(--cor-card)" }}
+          style={{
+            borderColor: "var(--cor-borda-clara)",
+            color: "var(--cor-texto)",
+            background: "var(--cor-card)",
+          }}
         >
           Sair
         </button>
@@ -283,98 +318,174 @@ function PainelPage() {
         </section>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <section
-          className="animate-fade-in-up rounded-2xl bg-white p-4 md:p-6"
-          style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)", animationDelay: "240ms", animationFillMode: "backwards" }}
-        >
-          <h2 className="mb-3 text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)" }}>
-            Distribuição por tema
-          </h2>
-          <div className="h-40 md:h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={TEMAS_TODOS.map((t) => ({ nome: LABELS_TEMA[t], valor: grafico.counts[t] }))}
-                margin={{ top: 16, right: 8, left: -20, bottom: 0 }}
-                onMouseLeave={() => setTemaAtivo(null)}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#E0E6EE" vertical={false} />
-                <XAxis dataKey="nome" tick={{ fontSize: 10, fill: "#6B7A8D" }} interval={0} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#6B7A8D" }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: "rgba(27,108,168,0.06)" }}
-                  formatter={(v: number) => [`${v} sessões`, "Total"]}
-                  contentStyle={{ borderRadius: 12, border: "1px solid #E0E6EE", fontSize: 12 }}
-                />
-                <Bar dataKey="valor" radius={[6, 6, 0, 0]} onMouseEnter={(_, i) => setTemaAtivo(i)}>
-                  {TEMAS_TODOS.map((t, i) => (
-                    <Cell
-                      key={t}
-                      fill="var(--cor-primaria)"
-                      fillOpacity={temaAtivo === null || temaAtivo === i ? 1 : 0.45}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
+          <section
+            className="animate-fade-in-up rounded-2xl bg-white p-4 md:p-6"
+            style={{
+              boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)",
+              animationDelay: "240ms",
+              animationFillMode: "backwards",
+            }}
+          >
+            <h2
+              className="mb-3 text-sm md:text-base font-extrabold"
+              style={{ color: "var(--cor-texto)" }}
+            >
+              Distribuição por tema
+            </h2>
+            <div className="h-40 md:h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={TEMAS_TODOS.map((t) => ({
+                    nome: LABELS_TEMA[t],
+                    valor: grafico.counts[t],
+                  }))}
+                  margin={{ top: 16, right: 8, left: -20, bottom: 0 }}
+                  onMouseLeave={() => setTemaAtivo(null)}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--cor-borda-leve)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="nome"
+                    tick={{ fontSize: 10, fill: "var(--cor-texto-leve)" }}
+                    interval={0}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 10, fill: "var(--cor-texto-leve)" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(27,108,168,0.06)" }}
+                    formatter={(v: number) => [`${v} sessões`, "Total"]}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid var(--cor-borda-leve)",
+                      fontSize: 12,
+                    }}
+                  />
+                  <Bar
+                    dataKey="valor"
+                    radius={[6, 6, 0, 0]}
+                    onMouseEnter={(_, i) => setTemaAtivo(i)}
+                  >
+                    {TEMAS_TODOS.map((t, i) => (
+                      <Cell
+                        key={t}
+                        fill="var(--cor-primaria)"
+                        fillOpacity={temaAtivo === null || temaAtivo === i ? 1 : 0.45}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
 
-        <section
-          className="animate-fade-in-up rounded-2xl bg-white p-4 md:p-6"
-          style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)", animationDelay: "320ms", animationFillMode: "backwards" }}
-        >
-          <h2 className="mb-3 text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)" }}>
-            Acessos por dia da semana
-          </h2>
-          <div className="h-40 md:h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={acessosPorDia.labels.map((lbl, i) => ({ nome: lbl, valor: acessosPorDia.valores[i] }))}
-                margin={{ top: 16, right: 8, left: -20, bottom: 0 }}
-                onMouseLeave={() => setDiaAtivo(null)}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#E0E6EE" vertical={false} />
-                <XAxis dataKey="nome" tick={{ fontSize: 10, fill: "#6B7A8D" }} interval={0} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#6B7A8D" }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: "rgba(46,204,113,0.08)" }}
-                  formatter={(v: number) => [`${v} acessos`, "Total"]}
-                  contentStyle={{ borderRadius: 12, border: "1px solid #E0E6EE", fontSize: 12 }}
-                />
-                <Bar dataKey="valor" radius={[6, 6, 0, 0]} onMouseEnter={(_, i) => setDiaAtivo(i)}>
-                  {acessosPorDia.labels.map((lbl, i) => (
-                    <Cell
-                      key={lbl}
-                      fill="var(--cor-secundaria, #2ECC71)"
-                      fillOpacity={diaAtivo === null || diaAtivo === i ? 1 : 0.45}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
+          <section
+            className="animate-fade-in-up rounded-2xl bg-white p-4 md:p-6"
+            style={{
+              boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)",
+              animationDelay: "320ms",
+              animationFillMode: "backwards",
+            }}
+          >
+            <h2
+              className="mb-3 text-sm md:text-base font-extrabold"
+              style={{ color: "var(--cor-texto)" }}
+            >
+              Acessos por dia da semana
+            </h2>
+            <div className="h-40 md:h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={acessosPorDia.labels.map((lbl, i) => ({
+                    nome: lbl,
+                    valor: acessosPorDia.valores[i],
+                  }))}
+                  margin={{ top: 16, right: 8, left: -20, bottom: 0 }}
+                  onMouseLeave={() => setDiaAtivo(null)}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--cor-borda-leve)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="nome"
+                    tick={{ fontSize: 10, fill: "var(--cor-texto-leve)" }}
+                    interval={0}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 10, fill: "var(--cor-texto-leve)" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(46,204,113,0.08)" }}
+                    formatter={(v: number) => [`${v} acessos`, "Total"]}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid var(--cor-borda-leve)",
+                      fontSize: 12,
+                    }}
+                  />
+                  <Bar
+                    dataKey="valor"
+                    radius={[6, 6, 0, 0]}
+                    onMouseEnter={(_, i) => setDiaAtivo(i)}
+                  >
+                    {acessosPorDia.labels.map((lbl, i) => (
+                      <Cell
+                        key={lbl}
+                        fill="var(--cor-secundaria, #2ECC71)"
+                        fillOpacity={diaAtivo === null || diaAtivo === i ? 1 : 0.45}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
         </div>
 
         <section
           className="animate-fade-in-up overflow-hidden rounded-2xl bg-white"
-          style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)", animationDelay: "400ms", animationFillMode: "backwards" }}
+          style={{
+            boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)",
+            animationDelay: "400ms",
+            animationFillMode: "backwards",
+          }}
         >
           <div
             className="flex flex-col gap-3 border-b px-4 md:px-6 py-3 md:py-4 sm:flex-row sm:items-center sm:justify-between"
-            style={{ borderColor: "#E0E6EE" }}
+            style={{ borderColor: "var(--cor-borda-leve)" }}
           >
-            <h2 className="text-sm md:text-base font-extrabold" style={{ color: "var(--cor-texto)" }}>
+            <h2
+              className="text-sm md:text-base font-extrabold"
+              style={{ color: "var(--cor-texto)" }}
+            >
               Sessões recentes
             </h2>
             <div className="flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-1 text-[11px] font-bold" style={{ color: "var(--cor-texto-leve)" }}>
+              <label
+                className="flex items-center gap-1 text-[11px] font-bold"
+                style={{ color: "var(--cor-texto-leve)" }}
+              >
                 Risco:
                 <select
                   value={filtroNivel}
                   onChange={(e) => setFiltroNivel(e.target.value as typeof filtroNivel)}
                   className="rounded-lg border bg-white px-2 py-1 text-[11px] font-semibold"
-                  style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)" }}
+                  style={{ borderColor: "var(--cor-borda-clara)", color: "var(--cor-texto)" }}
                 >
                   <option value="todos">Todos</option>
                   <option value="grave">Grave</option>
@@ -382,13 +493,16 @@ function PainelPage() {
                   <option value="leve">Leve</option>
                 </select>
               </label>
-              <label className="flex items-center gap-1 text-[11px] font-bold" style={{ color: "var(--cor-texto-leve)" }}>
+              <label
+                className="flex items-center gap-1 text-[11px] font-bold"
+                style={{ color: "var(--cor-texto-leve)" }}
+              >
                 Status:
                 <select
                   value={filtroStatus}
                   onChange={(e) => setFiltroStatus(e.target.value as typeof filtroStatus)}
                   className="rounded-lg border bg-white px-2 py-1 text-[11px] font-semibold"
-                  style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)" }}
+                  style={{ borderColor: "var(--cor-borda-clara)", color: "var(--cor-texto)" }}
                 >
                   <option value="todos">Todos</option>
                   <option value="pendente">Pendente</option>
@@ -399,7 +513,11 @@ function PainelPage() {
               <button
                 onClick={exportarCSV}
                 className="rounded-lg border px-3 py-1 text-[11px] font-bold transition hover:opacity-80"
-                style={{ borderColor: "var(--cor-primaria)", color: "#fff", background: "var(--cor-primaria)" }}
+                style={{
+                  borderColor: "var(--cor-primaria)",
+                  color: "#fff",
+                  background: "var(--cor-primaria)",
+                }}
               >
                 ⬇ Exportar CSV
               </button>
@@ -408,7 +526,7 @@ function PainelPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-xs md:text-sm">
               <thead>
-                <tr style={{ background: "#F4F8FC", color: "var(--cor-texto-leve)" }}>
+                <tr style={{ background: "var(--cor-fundo-leve)", color: "var(--cor-texto-leve)" }}>
                   <th className="px-3 py-2 font-bold">ID</th>
                   <th className="px-3 py-2 font-bold">Tema</th>
                   <th className="px-3 py-2 font-bold">Risco</th>
@@ -420,7 +538,11 @@ function PainelPage() {
               <tbody>
                 {alertasFiltrados.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-3 py-6 text-center text-[12px]" style={{ color: "var(--cor-texto-leve)" }}>
+                    <td
+                      colSpan={6}
+                      className="px-3 py-6 text-center text-[12px]"
+                      style={{ color: "var(--cor-texto-leve)" }}
+                    >
                       Nenhuma sessão corresponde aos filtros selecionados.
                     </td>
                   </tr>
@@ -428,28 +550,55 @@ function PainelPage() {
                 {alertasFiltrados.map((a) => {
                   const grave = a.nivel === "grave";
                   return (
-                    <tr key={a.registro_id} className="border-t" style={{ background: grave ? "#FFEBEE" : "transparent", borderColor: "#E0E6EE" }}>
-                      <td className="px-3 py-2 font-mono text-[11px]" style={{ color: "var(--cor-texto-leve)" }}>
+                    <tr
+                      key={a.registro_id}
+                      className="border-t"
+                      style={{
+                        background: grave ? "var(--cor-crise, #FFEBEE)" : "transparent",
+                        borderColor: "var(--cor-borda-leve)",
+                      }}
+                    >
+                      <td
+                        className="px-3 py-2 font-mono text-[11px]"
+                        style={{ color: "var(--cor-texto-leve)" }}
+                      >
                         #{a.registro_id.replace(/-/g, "").slice(0, 8)}
-                        {a.ultimaAnotacao ? <span title={a.ultimaAnotacao} className="ml-1">📝</span> : null}
+                        {a.ultimaAnotacao ? (
+                          <span title={a.ultimaAnotacao} className="ml-1">
+                            📝
+                          </span>
+                        ) : null}
                       </td>
                       <td className="px-3 py-2">
-                        <span className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white" style={{ background: "var(--cor-primaria)" }}>
+                        <span
+                          className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
+                          style={{ background: "var(--cor-primaria)" }}
+                        >
                           {LABELS_TEMA[a.tema]}
                         </span>
                       </td>
-                      <td className="px-3 py-2"><BadgeNivel nivel={a.nivel} /></td>
-                      <td className="px-3 py-2" style={{ color: "var(--cor-texto)" }}>
-                        {new Date(a.criado_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                      <td className="px-3 py-2">
+                        <BadgeNivel nivel={a.nivel} />
                       </td>
-                      <td className="px-3 py-2"><BadgeStatus status={a.status} /></td>
+                      <td className="px-3 py-2" style={{ color: "var(--cor-texto)" }}>
+                        {new Date(a.criado_em).toLocaleString("pt-BR", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        })}
+                      </td>
+                      <td className="px-3 py-2">
+                        <BadgeStatus status={a.status} />
+                      </td>
                       <td className="px-3 py-2">
                         <div className="flex flex-wrap items-center gap-1">
                           <select
                             value={a.status}
                             onChange={(e) => void alterarStatus(a, e.target.value as StatusEnum)}
                             className="rounded-lg border bg-white px-2 py-1 text-[11px] font-semibold"
-                            style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)" }}
+                            style={{
+                              borderColor: "var(--cor-borda-clara)",
+                              color: "var(--cor-texto)",
+                            }}
                             aria-label="Alterar status"
                           >
                             <option value="pendente">Pendente</option>
@@ -459,7 +608,11 @@ function PainelPage() {
                           <button
                             onClick={() => abrirAnotacao(a)}
                             className="rounded-lg border px-2 py-1 text-[11px] font-bold transition hover:opacity-80"
-                            style={{ borderColor: "#C8D2DD", color: "var(--cor-primaria)", background: "var(--cor-card)" }}
+                            style={{
+                              borderColor: "var(--cor-borda-clara)",
+                              color: "var(--cor-primaria)",
+                              background: "var(--cor-card)",
+                            }}
                             aria-label="Adicionar anotação interna"
                           >
                             📝 Anotar
@@ -474,12 +627,16 @@ function PainelPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl bg-white p-4 md:p-5" style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)" }}>
+        <section
+          className="rounded-2xl bg-white p-4 md:p-5"
+          style={{ boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)" }}
+        >
           <h2 className="text-sm font-extrabold md:text-base" style={{ color: "var(--cor-texto)" }}>
             💬 Mural de desabafos anônimos
           </h2>
           <p className="mt-1 text-[11px]" style={{ color: "var(--cor-texto-leve)" }}>
-            Relatos enviados voluntariamente pelos estudantes. Não há qualquer vínculo com identidade, sessão ou dispositivo.
+            Relatos enviados voluntariamente pelos estudantes. Não há qualquer vínculo com
+            identidade, sessão ou dispositivo.
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {desabafos.length === 0 && (
@@ -491,17 +648,29 @@ function PainelPage() {
               <article
                 key={d.id}
                 className="rounded-xl border-l-4 p-4"
-                style={{ background: "#F7FAFD", borderLeftColor: "var(--cor-primaria)" }}
+                style={{
+                  background: "var(--cor-fundo-super-leve)",
+                  borderLeftColor: "var(--cor-primaria)",
+                }}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: "var(--cor-primaria)" }}>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+                    style={{ background: "var(--cor-primaria)" }}
+                  >
                     {LABELS_TEMA[d.tema as Tema] ?? d.tema}
                   </span>
                   <span className="text-[10px]" style={{ color: "var(--cor-texto-leve)" }}>
-                    {new Date(d.criado_em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                    {new Date(d.criado_em).toLocaleString("pt-BR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
                   </span>
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed" style={{ color: "var(--cor-texto)" }}>
+                <p
+                  className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed"
+                  style={{ color: "var(--cor-texto)" }}
+                >
                   {d.texto}
                 </p>
               </article>
@@ -510,7 +679,8 @@ function PainelPage() {
         </section>
 
         <p className="text-center text-[11px]" style={{ color: "var(--cor-texto-leve)" }}>
-          Conformidade LGPD — sessões exibem apenas status, tema e nível de risco. Os desabafos são anônimos e sem rastreabilidade.
+          Conformidade LGPD — sessões exibem apenas status, tema e nível de risco. Os desabafos são
+          anônimos e sem rastreabilidade.
         </p>
       </div>
 
@@ -536,13 +706,17 @@ function PainelPage() {
               rows={5}
               placeholder="Ex.: aluno encaminhado à orientação em 25/07; conversa agendada com responsável."
               className="mt-3 w-full resize-none rounded-lg border bg-white p-3 text-sm outline-none"
-              style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)" }}
+              style={{ borderColor: "var(--cor-borda-clara)", color: "var(--cor-texto)" }}
             />
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setAnotandoId(null)}
                 className="rounded-lg border px-4 py-2 text-sm font-bold"
-                style={{ borderColor: "#C8D2DD", color: "var(--cor-texto)", background: "var(--cor-card)" }}
+                style={{
+                  borderColor: "var(--cor-borda-clara)",
+                  color: "var(--cor-texto)",
+                  background: "var(--cor-card)",
+                }}
               >
                 Cancelar
               </button>
@@ -561,14 +735,37 @@ function PainelPage() {
   );
 }
 
-function CardKPI({ cor, bg, label, valor, delay, pulse }: { cor: string; bg: string; label: string; valor: number; delay: number; pulse?: boolean }) {
+function CardKPI({
+  cor,
+  bg,
+  label,
+  valor,
+  delay,
+  pulse,
+}: {
+  cor: string;
+  bg: string;
+  label: string;
+  valor: number;
+  delay: number;
+  pulse?: boolean;
+}) {
   return (
     <div
       className={`animate-fade-in-up rounded-2xl p-4 ${pulse ? "animate-pulse-alert" : ""}`}
-      style={{ background: bg, boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)", animationDelay: `${delay}ms`, animationFillMode: "backwards" }}
+      style={{
+        background: bg,
+        boxShadow: "0 2px 12px rgba(27, 108, 168, 0.08)",
+        animationDelay: `${delay}ms`,
+        animationFillMode: "backwards",
+      }}
     >
-      <div className="text-3xl font-extrabold" style={{ color: cor }}>{valor}</div>
-      <div className="mt-1 text-xs font-bold leading-tight" style={{ color: cor }}>{label}</div>
+      <div className="text-3xl font-extrabold" style={{ color: cor }}>
+        {valor}
+      </div>
+      <div className="mt-1 text-xs font-bold leading-tight" style={{ color: cor }}>
+        {label}
+      </div>
     </div>
   );
 }
@@ -582,7 +779,10 @@ function BadgeStatus({ status }: { status: StatusEnum }) {
   };
   const s = map[status];
   return (
-    <span className="rounded-full px-2 py-0.5 text-[11px] font-bold" style={{ background: s.bg, color: s.fg }}>
+    <span
+      className="rounded-full px-2 py-0.5 text-[11px] font-bold"
+      style={{ background: s.bg, color: s.fg }}
+    >
       {s.label}
     </span>
   );
@@ -596,7 +796,10 @@ function BadgeNivel({ nivel }: { nivel: NivelRisco }) {
   };
   const s = map[nivel];
   return (
-    <span className="rounded-full px-2 py-0.5 text-[11px] font-bold" style={{ background: s.bg, color: s.fg }}>
+    <span
+      className="rounded-full px-2 py-0.5 text-[11px] font-bold"
+      style={{ background: s.bg, color: s.fg }}
+    >
       {s.label}
     </span>
   );
