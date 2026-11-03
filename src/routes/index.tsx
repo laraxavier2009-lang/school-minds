@@ -64,10 +64,32 @@ function Portal() {
             <span className="text-3xl">🏫</span>
             <div>
               <h2 className="text-lg font-extrabold" style={{ color: "#1B6CA8" }}>
-                Acesso Gestão
+                Acesso da Equipe
               </h2>
               <p className="text-sm" style={{ color: "var(--cor-texto-leve)" }}>
-                Login restrito à equipe escolar.
+                Login para psicólogos e orientadores.
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/painel/gestor/login"
+          className="animate-fade-in-up block rounded-2xl border-2 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+          style={{
+            borderColor: "#D97706",
+            boxShadow: "0 2px 12px rgba(217, 119, 6, 0.15)",
+            animationDelay: "300ms",
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🧭</span>
+            <div>
+              <h2 className="text-lg font-extrabold" style={{ color: "#A65D03" }}>
+                Acesso do Gestor
+              </h2>
+              <p className="text-sm" style={{ color: "var(--cor-texto-leve)" }}>
+                Entrada exclusiva para gestores escolares.
               </p>
             </div>
           </div>

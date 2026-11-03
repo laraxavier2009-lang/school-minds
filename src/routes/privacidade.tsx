@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { listarContatosApoio, type ContatoApoio } from "@/lib/dados";
+import { listarContatosApoio, registrarAcessoPortal, type ContatoApoio } from "@/lib/dados";
 import logoBrain from "@/assets/logo-brain.png";
 
 export const Route = createFileRoute("/privacidade")({
@@ -56,14 +56,22 @@ function Privacidade() {
           }}
         >
           <p className="text-[16px] font-bold" style={{ color: "var(--cor-texto)" }}>
-            🔒 Tudo o que conversarmos aqui é seguro e confidencial.
+            🔒 Sua privacidade importa.
           </p>
           <p
             className="mt-3 text-[15px] leading-relaxed"
             style={{ color: "var(--cor-texto-leve)" }}
           >
-            Mas atenção: eu sou um robô. Não substituo psicólogo, não faço diagnóstico e não sou
-            canal de emergência.
+            Se você continuar, registraremos as etapas acessadas, o tema escolhido, o nível de
+            atenção e a data e hora. Não pedimos nem armazenamos seu nome, e-mail, respostas ou
+            relatos escritos. A equipe escolar vê os registros sem identificação pessoal.
+          </p>
+          <p
+            className="mt-3 text-[15px] leading-relaxed"
+            style={{ color: "var(--cor-texto-leve)" }}
+          >
+            Sou um robô: não substituo psicólogo, não faço diagnóstico e não sou canal de
+            emergência.
           </p>
         </div>
 
@@ -114,6 +122,7 @@ function Privacidade() {
         <div className="animate-fade-in-up space-y-3" style={{ animationDelay: "300ms" }}>
           <Link
             to="/temas"
+            onClick={() => void registrarAcessoPortal("portal")}
             className="flex h-[52px] w-full items-center justify-center rounded-xl text-[18px] font-bold text-white transition-opacity hover:opacity-90"
             style={{ background: "var(--cor-primaria)" }}
           >
@@ -135,7 +144,7 @@ function Privacidade() {
           className="animate-fade-in-up text-center text-[13px]"
           style={{ color: "var(--cor-texto-leve)", animationDelay: "400ms" }}
         >
-          Nenhuma resposta sua fica salva.
+          O registro começa quando você escolhe continuar. Nenhum nome ou e-mail é solicitado.
         </p>
       </div>
     </main>

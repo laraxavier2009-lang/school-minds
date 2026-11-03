@@ -29,7 +29,7 @@ export function ProtectedRoute({ children }: Props) {
         const { data: equipe, error } = await supabaseClient
           .from("equipe_escola")
           .select("id, cargo")
-          .eq("id", session.user.id)
+          .eq("user_id", session.user.id)
           .maybeSingle();
         if (!ativo) return;
         if (error) {

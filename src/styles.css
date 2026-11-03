@@ -291,6 +291,18 @@
   color: var(--cor-texto) !important;
 }
 
+.dark .contraste-superficie-clara h3 {
+  color: #263238 !important;
+}
+
+.dark .contraste-superficie-clara p {
+  color: #4b5563 !important;
+}
+
+.dark .contraste-superficie-clara-text {
+  color: #263238 !important;
+}
+
 .dark .rounded-2xl,
 .dark .rounded-xl,
 .dark .rounded-lg {

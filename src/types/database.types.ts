@@ -1,212 +1,26 @@
-export type CargoEquipe = "psicologo" | "orientador" | "gestor";
+import type { Database as SupabaseDatabase } from "@/integrations/supabase/types";
 
-export type Tema = "ansiedade" | "tristeza" | "bullying" | "luto" | "estresse" | "pedir_ajuda";
+export type Database = SupabaseDatabase;
+export type CargoEquipe = Database["public"]["Tables"]["equipe_escola"]["Row"]["cargo"];
+export type Tema = Database["public"]["Enums"]["tema_enum"];
+export type NivelRisco = Database["public"]["Enums"]["nivel_enum"];
+export type NivelAlerta = Database["public"]["Tables"]["alertas"]["Row"]["nivel"];
+export type StatusAlerta = Database["public"]["Enums"]["status_enum"];
 
-export type NivelRisco = "leve" | "medio" | "grave";
-
-export type NivelAlerta = "medio" | "grave";
-
-export type StatusAlerta = "pendente" | "em_atendimento" | "concluido";
-
-export interface EquipeEscolaRow {
-  id: string;
-  nome: string;
-  email: string;
-  cargo: CargoEquipe;
-  criado_em: string;
-}
-
-export interface EquipeEscolaInsert {
-  id: string;
-  nome: string;
-  email: string;
-  cargo: CargoEquipe;
-  criado_em?: string;
-}
-
-export interface EquipeEscolaUpdate {
-  id?: string;
-  nome?: string;
-  email?: string;
-  cargo?: CargoEquipe;
-  criado_em?: string;
-}
-
-export interface SessaoRow {
-  id: string;
-  iniciada_em: string;
-  encerrada_em: string | null;
-  status: string;
-}
-
-export interface SessaoInsert {
-  id?: string;
-  iniciada_em?: string;
-  encerrada_em?: string | null;
-  status: string;
-}
-
-export interface SessaoUpdate {
-  id?: string;
-  iniciada_em?: string;
-  encerrada_em?: string | null;
-  status?: string;
-}
-
-export interface RegistroRow {
-  id: string;
-  sessao_id: string;
-  tema: Tema;
-  pontuacao_total: number;
-  nivel_risco: NivelRisco;
-  criado_em: string;
-}
-
-export interface RegistroInsert {
-  id?: string;
-  sessao_id: string;
-  tema: Tema;
-  pontuacao_total: number;
-  nivel_risco: NivelRisco;
-  criado_em?: string;
-}
-
-export interface RegistroUpdate {
-  id?: string;
-  sessao_id?: string;
-  tema?: Tema;
-  pontuacao_total?: number;
-  nivel_risco?: NivelRisco;
-  criado_em?: string;
-}
-
-export interface AlertaRow {
-  id: string;
-  registro_id: string;
-  nivel: NivelAlerta;
-  status: StatusAlerta;
-  visualizado: boolean;
-  visualizado_por: string | null;
-  emitido_em: string;
-}
-
-export interface AlertaInsert {
-  id?: string;
-  registro_id: string;
-  nivel: NivelAlerta;
-  status: StatusAlerta;
-  visualizado?: boolean;
-  visualizado_por?: string | null;
-  emitido_em?: string;
-}
-
-export interface AlertaUpdate {
-  id?: string;
-  registro_id?: string;
-  nivel?: NivelAlerta;
-  status?: StatusAlerta;
-  visualizado?: boolean;
-  visualizado_por?: string | null;
-  emitido_em?: string;
-}
-
-export interface RegistroEstatisticoRow {
-  id: string;
-  registro_id: string;
-  tema: string;
-  nivel_gravidade: string;
-  semana_ano: number;
-  ano: number;
-}
-
-export interface RegistroEstatisticoInsert {
-  id?: string;
-  registro_id: string;
-  tema: string;
-  nivel_gravidade: string;
-  semana_ano: number;
-  ano: number;
-}
-
-export interface RegistroEstatisticoUpdate {
-  id?: string;
-  registro_id?: string;
-  tema?: string;
-  nivel_gravidade?: string;
-  semana_ano?: number;
-  ano?: number;
-}
-
-type DatabaseObject<T> = { [Property in keyof T]: T[Property] };
-
-export interface Database {
-  public: {
-    Tables: {
-      equipe_escola: {
-        Row: DatabaseObject<EquipeEscolaRow>;
-        Insert: DatabaseObject<EquipeEscolaInsert>;
-        Update: DatabaseObject<EquipeEscolaUpdate>;
-        Relationships: [];
-      };
-      sessao: {
-        Row: DatabaseObject<SessaoRow>;
-        Insert: DatabaseObject<SessaoInsert>;
-        Update: DatabaseObject<SessaoUpdate>;
-        Relationships: [];
-      };
-      registros: {
-        Row: DatabaseObject<RegistroRow>;
-        Insert: DatabaseObject<RegistroInsert>;
-        Update: DatabaseObject<RegistroUpdate>;
-        Relationships: [
-          {
-            foreignKeyName: "registros_sessao_id_fkey";
-            columns: ["sessao_id"];
-            isOneToOne: false;
-            referencedRelation: "sessao";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      alertas: {
-        Row: DatabaseObject<AlertaRow>;
-        Insert: DatabaseObject<AlertaInsert>;
-        Update: DatabaseObject<AlertaUpdate>;
-        Relationships: [
-          {
-            foreignKeyName: "alertas_registro_id_fkey";
-            columns: ["registro_id"];
-            isOneToOne: false;
-            referencedRelation: "registros";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "alertas_visualizado_por_fkey";
-            columns: ["visualizado_por"];
-            isOneToOne: false;
-            referencedRelation: "equipe_escola";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      registro_estatistico: {
-        Row: DatabaseObject<RegistroEstatisticoRow>;
-        Insert: DatabaseObject<RegistroEstatisticoInsert>;
-        Update: DatabaseObject<RegistroEstatisticoUpdate>;
-        Relationships: [
-          {
-            foreignKeyName: "registro_estatistico_registro_id_fkey";
-            columns: ["registro_id"];
-            isOneToOne: false;
-            referencedRelation: "registros";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-    };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
-    CompositeTypes: Record<string, never>;
-  };
-}
+export type EquipeEscolaRow = Database["public"]["Tables"]["equipe_escola"]["Row"];
+export type EquipeEscolaInsert = Database["public"]["Tables"]["equipe_escola"]["Insert"];
+export type EquipeEscolaUpdate = Database["public"]["Tables"]["equipe_escola"]["Update"];
+export type SessaoRow = Database["public"]["Tables"]["sessao"]["Row"];
+export type SessaoInsert = Database["public"]["Tables"]["sessao"]["Insert"];
+export type SessaoUpdate = Database["public"]["Tables"]["sessao"]["Update"];
+export type RegistroRow = Database["public"]["Tables"]["registros"]["Row"];
+export type RegistroInsert = Database["public"]["Tables"]["registros"]["Insert"];
+export type RegistroUpdate = Database["public"]["Tables"]["registros"]["Update"];
+export type AlertaRow = Database["public"]["Tables"]["alertas"]["Row"];
+export type AlertaInsert = Database["public"]["Tables"]["alertas"]["Insert"];
+export type AlertaUpdate = Database["public"]["Tables"]["alertas"]["Update"];
+export type RegistroEstatisticoRow = Database["public"]["Tables"]["registro_estatistico"]["Row"];
+export type RegistroEstatisticoInsert =
+  Database["public"]["Tables"]["registro_estatistico"]["Insert"];
+export type RegistroEstatisticoUpdate =
+  Database["public"]["Tables"]["registro_estatistico"]["Update"];

@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
+import { registrarAcessoPortal } from "@/lib/dados";
 import logoBrain from "@/assets/logo-brain.png";
 
 type Search = { tema?: Tema };
@@ -22,6 +23,11 @@ export const Route = createFileRoute("/resultado/$nivel")({
 function Resultado() {
   const { nivel } = Route.useParams();
   const { tema } = Route.useSearch();
+
+  useEffect(() => {
+    if (isNivel(nivel)) void registrarAcessoPortal("resultado", tema, nivel);
+  }, [nivel, tema]);
+
   if (!isNivel(nivel)) return null;
 
   if (nivel === "leve") return <RespostaLeve tema={tema} />;
@@ -221,7 +227,7 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
         />
 
         <div
-          className="rounded-2xl border-2 p-5"
+          className="contraste-superficie-clara rounded-2xl border-2 p-5"
           style={{ background: "#E3F2FD", borderColor: "#85C1E9" }}
         >
           <div className="flex items-start gap-3">
@@ -245,7 +251,7 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
 
         <Link
           to="/"
-          className="flex h-[52px] w-full items-center justify-center rounded-xl text-[18px] font-bold"
+          className="contraste-superficie-clara-text flex h-[52px] w-full items-center justify-center rounded-xl text-[18px] font-bold"
           style={{ background: "#E5E9EE", color: "var(--cor-texto)" }}
         >
           Encerrar

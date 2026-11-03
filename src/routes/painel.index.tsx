@@ -1,8 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { supabaseClient } from "@/lib/supabaseClient";
+import {
+  obterEstatisticasPortal,
+  type EtapaAcessoPortal,
+  type EstatisticasPortal,
+} from "@/lib/dados";
 import { LABELS_TEMA, type NivelRisco, type Tema } from "@/lib/triagem";
 import type { StatusAlerta } from "@/types/database.types";
 
@@ -24,7 +36,6 @@ type AlertaPainel = {
   registros: {
     tema: Tema;
     nivel_risco: NivelRisco;
-    pontuacao_total: number;
     criado_em: string;
   } | null;
 };
@@ -33,13 +44,38 @@ const STATUS_LABEL: Record<StatusAlerta, string> = {
   pendente: "Pendente",
   em_atendimento: "Em atendimento",
   concluido: "Concluído",
+  nao_localizado: "Não localizado",
 };
 
 const STATUS_CLASS: Record<StatusAlerta, string> = {
   pendente: "bg-amber-100 text-amber-900",
   em_atendimento: "bg-blue-100 text-blue-900",
   concluido: "bg-green-100 text-green-900",
+  nao_localizado: "bg-red-100 text-red-900",
 };
+
+const ETAPA_LABEL: Record<EtapaAcessoPortal, string> = {
+  portal: "Entrada",
+  temas: "Temas",
+  triagem: "Triagem",
+  resultado: "Resultado",
+};
+
+const NIVEL_LABEL: Record<NivelRisco, string> = {
+  leve: "Leve",
+  medio: "Médio",
+  grave: "Grave",
+};
+
+const NIVEL_COR: Record<NivelRisco, string> = {
+  leve: "#23845B",
+  medio: "#C47A13",
+  grave: "#C43D3D",
+};
+
+const GRAFICO_CONFIG = {
+  total: { label: "Total", color: "#167C80" },
+} satisfies ChartConfig;
 
 function PainelPage() {
   const navigate = useNavigate();
@@ -47,12 +83,15 @@ function PainelPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [atualizandoId, setAtualizandoId] = useState<string | null>(null);
+  const [estatisticas, setEstatisticas] = useState<EstatisticasPortal | null>(null);
+  const [carregandoEstatisticas, setCarregandoEstatisticas] = useState(true);
+  const [erroEstatisticas, setErroEstatisticas] = useState(false);
 
   const carregarAlertas = useCallback(async () => {
     const { data, error } = await supabaseClient
       .from("alertas")
       .select(
-        "id, registro_id, nivel, status, emitido_em, registros!alertas_registro_id_fkey(tema, nivel_risco, pontuacao_total, criado_em)",
+        "id, registro_id, nivel, status, emitido_em, registros!alertas_registro_id_fkey(tema, nivel_risco, criado_em)",
       )
       .order("emitido_em", { ascending: false });
 
@@ -62,6 +101,22 @@ function PainelPage() {
 
     setAlertas(data ?? []);
   }, []);
+
+  const carregarEstatisticas = useCallback(async () => {
+    try {
+      setEstatisticas(await obterEstatisticasPortal());
+      setErroEstatisticas(false);
+    } catch (error) {
+      console.error("[Painel] Falha ao carregar estatísticas anônimas.", error);
+      setErroEstatisticas(true);
+    } finally {
+      setCarregandoEstatisticas(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void carregarEstatisticas();
+  }, [carregarEstatisticas]);
 
   useEffect(() => {
     let ativo = true;
@@ -100,6 +155,16 @@ function PainelPage() {
           });
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "acessos_portal" },
+        () => void carregarEstatisticas(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "registros" },
+        () => void carregarEstatisticas(),
+      )
       .subscribe((status, subscriptionError) => {
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           console.error("[Painel] Falha na conexão Realtime.", subscriptionError);
@@ -111,7 +176,7 @@ function PainelPage() {
       ativo = false;
       void supabaseClient.removeChannel(canal);
     };
-  }, [carregarAlertas]);
+  }, [carregarAlertas, carregarEstatisticas]);
 
   const contadores = useMemo(
     () => ({
@@ -126,6 +191,17 @@ function PainelPage() {
     () => alertas.filter((alerta) => alerta.status !== "concluido"),
     [alertas],
   );
+
+  const dadosAcessos = (estatisticas?.acessosPorEtapa ?? []).map(({ etapa, total }) => ({
+    etapa: ETAPA_LABEL[etapa],
+    total,
+  }));
+  const dadosNiveis = (estatisticas?.triagensPorNivel ?? []).map(({ nivel, total }) => ({
+    nivel,
+    total,
+  }));
+  const totalPorNivel = (nivel: NivelRisco) =>
+    estatisticas?.triagensPorNivel.find((item) => item.nivel === nivel)?.total ?? 0;
 
   async function alterarStatus(alerta: AlertaPainel, status: StatusAlerta) {
     if (atualizandoId) return;
@@ -200,6 +276,89 @@ function PainelPage() {
         <Contador titulo="Total de alertas" valor={contadores.total} cor="sky" />
         <Contador titulo="Pendentes" valor={contadores.pendentes} cor="amber" />
         <Contador titulo="Concluídos" valor={contadores.concluidos} cor="green" />
+      </section>
+
+      <section aria-labelledby="estatisticas-titulo" className="space-y-4">
+        <header>
+          <h2 id="estatisticas-titulo" className="text-xl font-extrabold text-slate-900">
+            Atividade anônima do portal estudantil
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Totais por etapa e nível de atenção, sem nomes, e-mails ou respostas individuais.
+          </p>
+        </header>
+
+        {erroEstatisticas && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-800">
+            Não foi possível carregar as estatísticas anônimas.
+            <button
+              type="button"
+              onClick={() => void carregarEstatisticas()}
+              className="rounded-md border border-red-300 px-3 py-1.5 hover:bg-red-100"
+            >
+              Atualizar
+            </button>
+          </div>
+        )}
+
+        <section aria-label="Triagens por nível" className="grid gap-3 sm:grid-cols-3">
+          <Contador titulo="Nível leve" valor={totalPorNivel("leve")} cor="green" />
+          <Contador titulo="Nível médio" valor={totalPorNivel("medio")} cor="amber" />
+          <Contador titulo="Nível grave" valor={totalPorNivel("grave")} cor="red" />
+        </section>
+
+        {carregandoEstatisticas && !estatisticas ? (
+          <p
+            className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600"
+            role="status"
+          >
+            Carregando estatísticas anônimas…
+          </p>
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <h3 className="font-extrabold text-slate-900">Acessos por etapa</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Visitas registradas após continuar no portal.
+              </p>
+              <ChartContainer config={GRAFICO_CONFIG} className="mt-3 h-[240px] w-full aspect-auto">
+                <BarChart data={dadosAcessos} margin={{ top: 24, right: 12, bottom: 4, left: 0 }}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="etapa" tickLine={false} axisLine={false} />
+                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={32} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]}>
+                    <LabelList dataKey="total" position="top" />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            </section>
+
+            <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <h3 className="font-extrabold text-slate-900">Triagens por nível de atenção</h3>
+              <p className="mt-1 text-sm text-slate-600">Cada resultado concluído conta uma vez.</p>
+              <ChartContainer config={GRAFICO_CONFIG} className="mt-3 h-[240px] w-full aspect-auto">
+                <BarChart data={dadosNiveis} margin={{ top: 24, right: 12, bottom: 4, left: 0 }}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="nivel"
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(nivel: NivelRisco) => NIVEL_LABEL[nivel]}
+                  />
+                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={32} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                    {dadosNiveis.map(({ nivel }) => (
+                      <Cell key={nivel} fill={NIVEL_COR[nivel]} />
+                    ))}
+                    <LabelList dataKey="total" position="top" />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            </section>
+          </div>
+        )}
       </section>
 
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -332,6 +491,7 @@ function Contador({ titulo, valor, cor }: { titulo: string; valor: number; cor: 
     sky: "border-sky-200 bg-sky-50 text-sky-900",
     amber: "border-amber-200 bg-amber-50 text-amber-900",
     green: "border-green-200 bg-green-50 text-green-900",
+    red: "border-red-200 bg-red-50 text-red-900",
   };
 
   return (

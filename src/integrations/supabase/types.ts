@@ -12,26 +12,38 @@ export type Database = {
         Row: {
           atualizado_em: string;
           criado_em: string;
+          emitido_em: string;
           id: string;
+          nivel: "medio" | "grave";
           prazo_dias: number;
           registro_id: string;
           status: Database["public"]["Enums"]["status_enum"];
+          visualizado: boolean;
+          visualizado_por: string | null;
         };
         Insert: {
           atualizado_em?: string;
           criado_em?: string;
+          emitido_em?: string;
           id?: string;
+          nivel?: "medio" | "grave";
           prazo_dias?: number;
           registro_id: string;
           status?: Database["public"]["Enums"]["status_enum"];
+          visualizado?: boolean;
+          visualizado_por?: string | null;
         };
         Update: {
           atualizado_em?: string;
           criado_em?: string;
+          emitido_em?: string;
           id?: string;
+          nivel?: "medio" | "grave";
           prazo_dias?: number;
           registro_id?: string;
           status?: Database["public"]["Enums"]["status_enum"];
+          visualizado?: boolean;
+          visualizado_por?: string | null;
         };
         Relationships: [
           {
@@ -40,6 +52,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "registros";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alertas_visualizado_por_fkey";
+            columns: ["visualizado_por"];
+            isOneToOne: false;
+            referencedRelation: "equipe_escola";
+            referencedColumns: ["user_id"];
           },
         ];
       };
@@ -137,7 +156,7 @@ export type Database = {
       };
       equipe_escola: {
         Row: {
-          cargo: string;
+          cargo: "gestor" | "psicologo" | "orientador";
           criado_em: string;
           email: string | null;
           id: string;
@@ -145,7 +164,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          cargo: string;
+          cargo: "gestor" | "psicologo" | "orientador";
           criado_em?: string;
           email?: string | null;
           id?: string;
@@ -153,7 +172,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
-          cargo?: string;
+          cargo?: "gestor" | "psicologo" | "orientador";
           criado_em?: string;
           email?: string | null;
           id?: string;
@@ -204,7 +223,8 @@ export type Database = {
           nivel_risco: Database["public"]["Enums"]["nivel_enum"];
           origem: string;
           pediu_ajuda: boolean;
-          pontuacao_total: number;
+          pontuacao_total: number | null;
+          sessao_id: string | null;
           tema: Database["public"]["Enums"]["tema_enum"];
         };
         Insert: {
@@ -213,7 +233,8 @@ export type Database = {
           nivel_risco: Database["public"]["Enums"]["nivel_enum"];
           origem?: string;
           pediu_ajuda?: boolean;
-          pontuacao_total?: number;
+          pontuacao_total?: number | null;
+          sessao_id?: string | null;
           tema: Database["public"]["Enums"]["tema_enum"];
         };
         Update: {
@@ -222,8 +243,41 @@ export type Database = {
           nivel_risco?: Database["public"]["Enums"]["nivel_enum"];
           origem?: string;
           pediu_ajuda?: boolean;
-          pontuacao_total?: number;
+          pontuacao_total?: number | null;
+          sessao_id?: string | null;
           tema?: Database["public"]["Enums"]["tema_enum"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "registros_sessao_id_fkey";
+            columns: ["sessao_id"];
+            isOneToOne: false;
+            referencedRelation: "sessao";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      acessos_portal: {
+        Row: {
+          criado_em: string;
+          etapa: "portal" | "temas" | "triagem" | "resultado";
+          id: string;
+          nivel_risco: Database["public"]["Enums"]["nivel_enum"] | null;
+          tema: Database["public"]["Enums"]["tema_enum"] | null;
+        };
+        Insert: {
+          criado_em?: string;
+          etapa: "portal" | "temas" | "triagem" | "resultado";
+          id?: string;
+          nivel_risco?: Database["public"]["Enums"]["nivel_enum"] | null;
+          tema?: Database["public"]["Enums"]["tema_enum"] | null;
+        };
+        Update: {
+          criado_em?: string;
+          etapa?: "portal" | "temas" | "triagem" | "resultado";
+          id?: string;
+          nivel_risco?: Database["public"]["Enums"]["nivel_enum"] | null;
+          tema?: Database["public"]["Enums"]["tema_enum"] | null;
         };
         Relationships: [];
       };
@@ -264,6 +318,62 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      registro_estatistico: {
+        Row: {
+          ano: number;
+          id: string;
+          nivel_gravidade: string;
+          registro_id: string;
+          semana_ano: number;
+          tema: string;
+        };
+        Insert: {
+          ano: number;
+          id?: string;
+          nivel_gravidade: string;
+          registro_id: string;
+          semana_ano: number;
+          tema: string;
+        };
+        Update: {
+          ano?: number;
+          id?: string;
+          nivel_gravidade?: string;
+          registro_id?: string;
+          semana_ano?: number;
+          tema?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "registro_estatistico_registro_id_fkey";
+            columns: ["registro_id"];
+            isOneToOne: false;
+            referencedRelation: "registros";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      sessao: {
+        Row: {
+          encerrada_em: string | null;
+          id: string;
+          iniciada_em: string;
+          status: string;
+        };
+        Insert: {
+          encerrada_em?: string | null;
+          id?: string;
+          iniciada_em?: string;
+          status?: string;
+        };
+        Update: {
+          encerrada_em?: string | null;
+          id?: string;
+          iniciada_em?: string;
+          status?: string;
+        };
+        Relationships: [];
       };
     };
     Views: {

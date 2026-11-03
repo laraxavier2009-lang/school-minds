@@ -23,7 +23,7 @@ export function CardContato({
 }: Props) {
   return (
     <div
-      className="rounded-2xl border-2 p-5"
+      className="contraste-superficie-clara rounded-2xl border-2 p-5"
       style={{ background: corFundo, borderColor: corBorda }}
     >
       <div className="flex items-start gap-3">

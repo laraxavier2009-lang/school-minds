@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { BotaoOpcao } from "@/components/BotaoOpcao";
 import { ProgressoPerguntas } from "@/components/ProgressoPerguntas";
 import { RespiracaoCard } from "@/components/RespiracaoCard";
-import { salvarResultadoTriagem } from "@/lib/dados";
+import { registrarAcessoPortal, salvarResultadoTriagem } from "@/lib/dados";
 import { PERGUNTAS_POR_TEMA, LABELS_TEMA, calcularTriagem, isTema } from "@/lib/triagem";
 import { toast } from "sonner";
 
@@ -22,6 +22,10 @@ function Perguntas() {
   const { tema } = Route.useParams();
   const navigate = useNavigate();
   const perguntas = useMemo(() => (isTema(tema) ? PERGUNTAS_POR_TEMA[tema] : []), [tema]);
+
+  useEffect(() => {
+    if (isTema(tema)) void registrarAcessoPortal("triagem", tema);
+  }, [tema]);
 
   const [idx, setIdx] = useState(0);
   const [pesos, setPesos] = useState<number[]>([]);

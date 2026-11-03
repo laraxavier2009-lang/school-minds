@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { BotaoTema } from "@/components/BotaoTema";
 import { ICONES_TEMA, LABELS_TEMA } from "@/lib/triagem";
+import { registrarAcessoPortal } from "@/lib/dados";
 
 export const Route = createFileRoute("/temas")({
   head: () => ({
@@ -17,6 +19,10 @@ export const Route = createFileRoute("/temas")({
 });
 
 function MenuTemas() {
+  useEffect(() => {
+    void registrarAcessoPortal("temas");
+  }, []);
+
   return (
     <main className="px-5 pt-4 pb-10">
       <header className="flex items-center">

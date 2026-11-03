@@ -1,8 +1,58 @@
 import { supabase } from "@/integrations/supabase/client";
 import { supabaseClient } from "@/lib/supabaseClient";
 import type { NivelRisco, Tema } from "@/lib/triagem";
+import type { Database } from "@/types/database.types";
 
-export type StatusEnum = "pendente" | "em_atendimento" | "concluido" | "nao_localizado";
+export type StatusEnum = Database["public"]["Enums"]["status_enum"];
+export type EtapaAcessoPortal = "portal" | "temas" | "triagem" | "resultado";
+
+export interface EstatisticasPortal {
+  acessosPorEtapa: Array<{ etapa: EtapaAcessoPortal; total: number }>;
+  triagensPorNivel: Array<{ nivel: NivelRisco; total: number }>;
+}
+
+export async function registrarAcessoPortal(
+  etapa: EtapaAcessoPortal,
+  tema?: Tema,
+  nivelRisco?: NivelRisco,
+): Promise<void> {
+  const { error } = await supabaseClient.from("acessos_portal").insert({
+    etapa,
+    tema: tema ?? null,
+    nivel_risco: nivelRisco ?? null,
+  });
+  if (error) console.error("[Portal] Falha ao registrar acesso anônimo.", error);
+}
+
+export async function obterEstatisticasPortal(): Promise<EstatisticasPortal> {
+  const etapas: EtapaAcessoPortal[] = ["portal", "temas", "triagem", "resultado"];
+  const niveis: NivelRisco[] = ["leve", "medio", "grave"];
+
+  const contarAcessos = async (etapa: EtapaAcessoPortal) => {
+    const { count, error } = await supabaseClient
+      .from("acessos_portal")
+      .select("id", { count: "exact", head: true })
+      .eq("etapa", etapa);
+    if (error) throw error;
+    return count ?? 0;
+  };
+
+  const contarTriagens = async (nivel: NivelRisco) => {
+    const { count, error } = await supabaseClient
+      .from("registros")
+      .select("id", { count: "exact", head: true })
+      .eq("nivel_risco", nivel);
+    if (error) throw error;
+    return count ?? 0;
+  };
+
+  const [acessosPorEtapa, triagensPorNivel] = await Promise.all([
+    Promise.all(etapas.map(async (etapa) => ({ etapa, total: await contarAcessos(etapa) }))),
+    Promise.all(niveis.map(async (nivel) => ({ nivel, total: await contarTriagens(nivel) }))),
+  ]);
+
+  return { acessosPorEtapa, triagensPorNivel };
+}
 
 export async function salvarResultadoTriagem(
   tema: Tema,
@@ -31,7 +81,6 @@ export async function salvarResultadoTriagem(
     sessao_id: sessaoId,
     tema,
     nivel_risco: nivelRisco,
-    pontuacao_total: pontuacao,
   });
   if (registroError) {
     throw new Error("Não foi possível salvar o resultado da triagem.", {
