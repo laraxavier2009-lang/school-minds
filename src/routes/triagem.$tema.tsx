@@ -4,8 +4,9 @@ import { ChatBubble } from "@/components/ChatBubble";
 import { BotaoOpcao } from "@/components/BotaoOpcao";
 import { ProgressoPerguntas } from "@/components/ProgressoPerguntas";
 import { RespiracaoCard } from "@/components/RespiracaoCard";
-import { salvarSessaoTriagem, type RespostaSessao } from "@/lib/dados";
-import { PERGUNTAS_POR_TEMA, LABELS_TEMA, calcularNivel, isTema } from "@/lib/triagem";
+import { salvarResultadoTriagem } from "@/lib/dados";
+import { PERGUNTAS_POR_TEMA, LABELS_TEMA, calcularTriagem, isTema } from "@/lib/triagem";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/triagem/$tema")({
   beforeLoad: ({ params }) => {
@@ -24,37 +25,36 @@ function Perguntas() {
 
   const [idx, setIdx] = useState(0);
   const [pesos, setPesos] = useState<number[]>([]);
-  const [respostas, setRespostas] = useState<RespostaSessao[]>([]);
   const [respirou, setRespirou] = useState(false);
 
   if (!isTema(tema)) return null;
 
-  const finalizar = (todos: number[], todasRespostas: RespostaSessao[]) => {
-    const nivel = calcularNivel(todos);
-    void salvarSessaoTriagem({ tema, nivel, respostas: todasRespostas });
-    navigate({
+  const finalizar = (todos: number[]) => {
+    const resultado = calcularTriagem(todos);
+    void salvarResultadoTriagem(tema, resultado.pontuacao, resultado.nivelRisco).catch((error) => {
+      console.error("[Triagem] Falha ao salvar o resultado.", error);
+      toast.error(
+        "Não foi possível salvar o resultado. Se precisar, procure um adulto de confiança.",
+      );
+    });
+    void navigate({
       to: "/resultado/$nivel",
-      params: { nivel },
+      params: { nivel: resultado.nivelRisco },
       search: { tema },
     });
   };
 
-  const escolher = (peso: number, textoOpcao: string) => {
+  const escolher = (peso: number) => {
     const novos = [...pesos, peso];
-    const novasRespostas: RespostaSessao[] = [
-      ...respostas,
-      { ordem: idx, pergunta: perguntas[idx].texto, opcao: textoOpcao, peso },
-    ];
     if (peso === 3) {
-      finalizar(novos, novasRespostas);
+      finalizar(novos);
       return;
     }
     if (idx + 1 >= perguntas.length) {
-      finalizar(novos, novasRespostas);
+      finalizar(novos);
       return;
     }
     setPesos(novos);
-    setRespostas(novasRespostas);
     setIdx(idx + 1);
   };
 
@@ -126,7 +126,7 @@ function Perguntas() {
           <BotaoOpcao
             key={`${pergunta.id}-${i}`}
             texto={op.texto}
-            onClick={() => escolher(op.peso, op.texto)}
+            onClick={() => escolher(op.peso)}
           />
         ))}
       </div>

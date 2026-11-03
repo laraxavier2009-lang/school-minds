@@ -3,7 +3,6 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChatBubble } from "@/components/ChatBubble";
 import { CardContato } from "@/components/CardContato";
 import { isNivel, isTema, type Tema } from "@/lib/triagem";
-import { salvarDesabafo } from "@/lib/dados";
 import logoBrain from "@/assets/logo-brain.png";
 
 type Search = { tema?: Tema };
@@ -85,15 +84,15 @@ function ConfirmacaoPedidoAjuda({ prioridade }: { prioridade: "alta" | "urgente"
         <span className="text-3xl">🤝</span>
         <div>
           <h3 className="text-lg font-extrabold" style={{ color: "var(--cor-texto)" }}>
-            Seu pedido chegou até nós
+            Você merece apoio
           </h3>
           <p className="mt-2 text-[15px] leading-relaxed" style={{ color: "var(--cor-texto)" }}>
             {prioridade === "urgente"
-              ? "Recebemos seu pedido com prioridade máxima. A equipe da escola já foi avisada e vai te procurar com carinho e discrição — você não está sozinho(a)."
-              : "Recebemos seu pedido com prioridade. A equipe de orientação foi avisada e vai encontrar um jeito acolhedor de te procurar nos próximos dias."}
+              ? "Procure agora um adulto de confiança na escola e conte que precisa de ajuda urgente. Você não precisa passar por isso sozinho(a)."
+              : "Procure a orientação da escola ou converse com um adulto de confiança. Você pode pedir ajuda no seu tempo."}
           </p>
           <p className="mt-2 text-[13px]" style={{ color: "var(--cor-texto-leve)" }}>
-            Seu nome não aparece. Apenas o tema e o nível de atenção foram compartilhados.
+            A triagem registra apenas o tema e o nível de atenção, sem seu nome ou relato escrito.
           </p>
         </div>
       </div>
@@ -155,7 +154,7 @@ function RespostaMedio({ tema }: { tema?: Tema }) {
       </div>
 
       <p className="text-center text-[13px]" style={{ color: "var(--cor-texto-leve)" }}>
-        A escola foi notificada de que um aluno pediu apoio. Ninguém saberá que foi você.
+        Você pode procurar um adulto de confiança na escola para pedir apoio.
       </p>
 
       <div className="space-y-3">
@@ -179,21 +178,6 @@ function RespostaMedio({ tema }: { tema?: Tema }) {
 }
 
 function RespostaGrave({ tema }: { tema?: Tema }) {
-  const [mostrarContatos, setMostrarContatos] = useState(false);
-  const [desabafo, setDesabafo] = useState("");
-  const [enviando, setEnviando] = useState(false);
-
-  async function avancar() {
-    if (enviando) return;
-    setEnviando(true);
-    try {
-      await salvarDesabafo(tema ?? "pedir_ajuda", desabafo);
-    } finally {
-      setEnviando(false);
-      setMostrarContatos(true);
-    }
-  }
-
   return (
     <main className="px-5 pt-0 pb-10 space-y-4">
       <div
@@ -206,107 +190,67 @@ function RespostaGrave({ tema }: { tema?: Tema }) {
       <div className="pt-4 space-y-4">
         <ChatBubble texto="Sinto muito que você está passando por isso. Como sou um robô, preciso garantir sua segurança com ajuda de uma pessoa real." />
 
-        <ChatBubble texto="Sinto muito que você esteja passando por isso. Se quiser, você pode usar o espaço abaixo para desabafar ou escrever o que está sentindo agora. Sua mensagem será salva anonimamente no nosso sistema para ajudar a coordenação a entender as principais dores dos estudantes, mas sua identidade nunca será revelada. Esse espaço é totalmente opcional." />
+        <ChatBubble texto="Você não precisa escrever nem enviar nenhum relato aqui. Procure agora uma pessoa adulta de confiança para receber apoio." />
       </div>
 
       {tema === "pedir_ajuda" && <ConfirmacaoPedidoAjuda prioridade="urgente" />}
 
-      {!mostrarContatos && (
-        <div className="space-y-3">
-          <label htmlFor="desabafo" className="sr-only">
-            Espaço de desabafo (opcional)
-          </label>
-          <textarea
-            id="desabafo"
-            value={desabafo}
-            onChange={(e) => setDesabafo(e.target.value)}
-            placeholder="Escreva aqui seu desabafo (opcional)..."
-            className="min-h-[180px] w-full resize-none rounded-[12px] border border-[#D1E3F0] bg-white p-4 text-[16px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-[var(--cor-primaria)]"
-            style={{ color: "var(--cor-texto)" }}
-          />
-          <p className="text-center text-[12px]" style={{ color: "var(--cor-texto-leve)" }}>
-            Seu relato é guardado de forma totalmente anônima, sem qualquer ligação com você.
-          </p>
+      <div className="space-y-4 animate-fade-in-up">
+        <CardContato
+          icone="📞"
+          titulo="CVV — Centro de Valorização da Vida"
+          subtitulo="Ligação gratuita, sigilosa, 24 horas por dia."
+          numero="188"
+          telefone="188"
+          textoBotao="Ligar agora"
+          corFundo="#FFEBEE"
+          corBorda="#F5B7B1"
+          corDestaque="#E74C3C"
+        />
 
-          <button
-            type="button"
-            disabled={enviando}
-            onClick={() => void avancar()}
-            className="flex h-[52px] w-full items-center justify-center rounded-xl text-[17px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-70"
-            style={{ background: "var(--cor-secundaria)" }}
-          >
-            {enviando ? "Enviando..." : "Pronto, quero ver os canais de ajuda →"}
-          </button>
+        <CardContato
+          icone="🚑"
+          titulo="SAMU — Emergência médica"
+          subtitulo="Emergências de saúde 24h."
+          numero="192"
+          telefone="192"
+          textoBotao="Ligar SAMU"
+          corFundo="#FFF3E0"
+          corBorda="#F5CBA7"
+          corDestaque="#E67E22"
+        />
 
-          <button
-            type="button"
-            onClick={() => setMostrarContatos(true)}
-            className="block w-full text-center text-sm underline-offset-2 hover:underline"
-            style={{ color: "var(--cor-texto-leve)" }}
-          >
-            Pular para contatos de ajuda
-          </button>
-        </div>
-      )}
-
-      {mostrarContatos && (
-        <div className="space-y-4 animate-fade-in-up">
-          <CardContato
-            icone="📞"
-            titulo="CVV — Centro de Valorização da Vida"
-            subtitulo="Ligação gratuita, sigilosa, 24 horas por dia."
-            numero="188"
-            telefone="188"
-            textoBotao="Ligar agora"
-            corFundo="#FFEBEE"
-            corBorda="#F5B7B1"
-            corDestaque="#E74C3C"
-          />
-
-          <CardContato
-            icone="🚑"
-            titulo="SAMU — Emergência médica"
-            subtitulo="Emergências de saúde 24h."
-            numero="192"
-            telefone="192"
-            textoBotao="Ligar SAMU"
-            corFundo="#FFF3E0"
-            corBorda="#F5CBA7"
-            corDestaque="#E67E22"
-          />
-
-          <div
-            className="rounded-2xl border-2 p-5"
-            style={{ background: "#E3F2FD", borderColor: "#85C1E9" }}
-          >
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">🏫</span>
-              <div>
-                <h3 className="text-lg font-extrabold" style={{ color: "var(--cor-texto)" }}>
-                  Fale com um adulto agora
-                </h3>
-                <p className="mt-1 text-sm" style={{ color: "var(--cor-texto-leve)" }}>
-                  Procure um professor, coordenador ou qualquer adulto de confiança na escola agora
-                  mesmo.
-                </p>
-              </div>
+        <div
+          className="rounded-2xl border-2 p-5"
+          style={{ background: "#E3F2FD", borderColor: "#85C1E9" }}
+        >
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">🏫</span>
+            <div>
+              <h3 className="text-lg font-extrabold" style={{ color: "var(--cor-texto)" }}>
+                Fale com um adulto agora
+              </h3>
+              <p className="mt-1 text-sm" style={{ color: "var(--cor-texto-leve)" }}>
+                Procure um professor, coordenador ou qualquer adulto de confiança na escola agora
+                mesmo.
+              </p>
             </div>
           </div>
-
-          <p className="text-center text-[13px]" style={{ color: "var(--cor-texto-leve)" }}>
-            A equipe da escola foi avisada de que um aluno precisa de apoio. Você não será
-            identificado(a).
-          </p>
-
-          <Link
-            to="/"
-            className="flex h-[52px] w-full items-center justify-center rounded-xl text-[18px] font-bold"
-            style={{ background: "#E5E9EE", color: "var(--cor-texto)" }}
-          >
-            Encerrar
-          </Link>
         </div>
-      )}
+
+        <p className="text-center text-[13px]" style={{ color: "var(--cor-texto-leve)" }}>
+          Procure um adulto de confiança na escola para receber apoio. A triagem não envia seu nome
+          nem relatos escritos.
+        </p>
+
+        <Link
+          to="/"
+          className="flex h-[52px] w-full items-center justify-center rounded-xl text-[18px] font-bold"
+          style={{ background: "#E5E9EE", color: "var(--cor-texto)" }}
+        >
+          Encerrar
+        </Link>
+      </div>
     </main>
   );
 }

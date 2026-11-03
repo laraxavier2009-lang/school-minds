@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseClient } from "@/lib/supabaseClient";
 
 export const Route = createFileRoute("/painel/login")({
   head: () => ({ meta: [{ title: "Acesso à Gestão Escolar — Painel" }] }),
@@ -23,7 +23,7 @@ function LoginPainel() {
     }
     setCarregando(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password: senha,
       });
@@ -33,20 +33,27 @@ function LoginPainel() {
         return;
       }
       // Somente membros cadastrados na equipe da escola acessam os alertas.
-      const { data: membro } = await supabase
+      const { data: membro, error: membroError } = await supabaseClient
         .from("equipe_escola")
         .select("id, cargo")
-        .eq("user_id", data.user.id)
+        .eq("id", data.user.id)
         .maybeSingle();
+      if (membroError) {
+        await supabaseClient.auth.signOut();
+        setErro("Não foi possível verificar sua autorização. Tente novamente.");
+        setCarregando(false);
+        return;
+      }
       if (!membro || !["gestor", "psicologo", "orientador"].includes(membro.cargo)) {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         setErro("Acesso não autorizado para este perfil.");
         setCarregando(false);
         return;
       }
       setCarregando(false);
       void navigate({ to: "/painel" });
-    } catch {
+    } catch (error) {
+      console.error("[Painel] Falha durante o login.", error);
       setErro("Não foi possível entrar. Verifique sua conexão.");
       setCarregando(false);
     }
@@ -78,13 +85,6 @@ function LoginPainel() {
         >
           Área restrita para psicólogos, orientadores e gestores
         </p>
-
-        <div
-          className="mt-3 rounded-md px-3 py-2 text-center text-[11px] font-semibold leading-relaxed"
-          style={{ background: "#FFF7E0", color: "#9C4A14", border: "1px dashed #E6B36A" }}
-        >
-          Acesso de teste: gestao@escolapiaui.edu.br · MentalEscola@2026
-        </div>
 
         {erro && (
           <div

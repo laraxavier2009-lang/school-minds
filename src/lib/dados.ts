@@ -1,72 +1,59 @@
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseClient } from "@/lib/supabaseClient";
 import type { NivelRisco, Tema } from "@/lib/triagem";
 
 export type StatusEnum = "pendente" | "em_atendimento" | "concluido" | "nao_localizado";
 
-export interface RespostaSessao {
-  ordem: number;
-  pergunta: string;
-  opcao: string;
-  peso: number;
-}
-
-/**
- * Grava a sessão anônima de triagem: registro + respostas + alerta (médio/grave).
- * Nenhum dado identificável do aluno é enviado.
- */
-export async function salvarSessaoTriagem(params: {
-  tema: Tema;
-  nivel: NivelRisco;
-  respostas: RespostaSessao[];
-  pediuAjuda?: boolean;
-}): Promise<string | null> {
-  const pontuacao = params.respostas.reduce((s, r) => s + r.peso, 0);
-  const { data, error } = await supabase
-    .from("registros")
-    .insert({
-      tema: params.tema,
-      nivel_risco: params.nivel,
-      pontuacao_total: pontuacao,
-      pediu_ajuda: params.pediuAjuda ?? params.tema === "pedir_ajuda",
-      origem: "chatbot",
-    })
-    .select("id")
-    .single();
-  if (error || !data) return null;
-
-  if (params.respostas.length > 0) {
-    await supabase.from("respostas").insert(
-      params.respostas.map((r) => ({
-        registro_id: data.id,
-        ordem: r.ordem,
-        pergunta: r.pergunta,
-        opcao: r.opcao,
-        peso: r.peso,
-      })),
-    );
+export async function salvarResultadoTriagem(
+  tema: Tema,
+  pontuacao: number,
+  nivelRisco: NivelRisco,
+): Promise<string> {
+  if (!Number.isSafeInteger(pontuacao) || pontuacao < 1) {
+    throw new RangeError("A pontuação da triagem deve ser um inteiro positivo.");
   }
 
-  if (params.nivel === "medio" || params.nivel === "grave") {
-    await supabase.from("alertas").insert({
-      registro_id: data.id,
-      status: "pendente",
-      prazo_dias: params.nivel === "grave" ? 1 : 7,
+  const sessaoId = crypto.randomUUID();
+  const registroId = crypto.randomUUID();
+
+  const { error: sessaoError } = await supabaseClient.from("sessao").insert({
+    id: sessaoId,
+    status: "encerrada",
+  });
+  if (sessaoError) {
+    throw new Error("Não foi possível iniciar o registro anônimo da triagem.", {
+      cause: sessaoError,
     });
   }
 
-  return data.id;
-}
+  const { error: registroError } = await supabaseClient.from("registros").insert({
+    id: registroId,
+    sessao_id: sessaoId,
+    tema,
+    nivel_risco: nivelRisco,
+    pontuacao_total: pontuacao,
+  });
+  if (registroError) {
+    throw new Error("Não foi possível salvar o resultado da triagem.", {
+      cause: registroError,
+    });
+  }
 
-/**
- * Grava um desabafo totalmente anônimo (sem vínculo com sessão, usuário ou IP).
- * Texto vazio é gravado como NULL — o preenchimento é opcional.
- */
-export async function salvarDesabafo(tema: string, texto: string): Promise<boolean> {
-  const limpo = texto.trim();
-  const { error } = await supabase
-    .from("desabafos_anonimos")
-    .insert(limpo.length > 0 ? { tema, texto: limpo } : { tema });
-  return !error;
+  if (nivelRisco === "medio" || nivelRisco === "grave") {
+    const { error: alertaError } = await supabaseClient.from("alertas").insert({
+      id: crypto.randomUUID(),
+      registro_id: registroId,
+      nivel: nivelRisco,
+      status: "pendente",
+    });
+    if (alertaError) {
+      throw new Error("O resultado foi salvo, mas não foi possível criar o alerta.", {
+        cause: alertaError,
+      });
+    }
+  }
+
+  return registroId;
 }
 
 export interface DesabafoAnonimo {

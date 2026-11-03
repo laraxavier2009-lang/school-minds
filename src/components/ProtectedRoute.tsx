@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseClient } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
 interface Props {
@@ -14,67 +14,73 @@ export function ProtectedRoute({ children }: Props) {
 
   useEffect(() => {
     let ativo = true;
-    let concluiu = false;
 
     async function verificar() {
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError) throw sessionError;
         const session = data.session;
         if (!ativo) return;
         if (!session) {
-          concluiu = true;
-          void navigate({ to: "/painel/login" });
+          setVerificando(false);
+          void navigate({ to: "/painel/login", replace: true });
           return;
         }
-        const { data: equipe, error } = await supabase
+        const { data: equipe, error } = await supabaseClient
           .from("equipe_escola")
           .select("id, cargo")
-          .eq("user_id", session.user.id)
+          .eq("id", session.user.id)
           .maybeSingle();
         if (!ativo) return;
-        concluiu = true;
-        if (error || !equipe) {
+        if (error) {
+          console.error("[Painel] Falha ao consultar o perfil da equipe.", error);
+          toast.error("Não foi possível verificar sua autorização.");
+          setVerificando(false);
+          void navigate({ to: "/painel/login", replace: true });
+          return;
+        }
+        if (!equipe) {
           toast.error("Você não tem permissão de acesso ao painel.");
-          await supabase.auth.signOut();
-          void navigate({ to: "/painel/login" });
+          const { error: signOutError } = await supabaseClient.auth.signOut();
+          if (signOutError)
+            console.error("[Painel] Falha ao encerrar sessão sem autorização.", signOutError);
+          setVerificando(false);
+          void navigate({ to: "/painel/login", replace: true });
           return;
         }
         if (!["gestor", "psicologo", "orientador"].includes(equipe.cargo)) {
           toast.error("Acesso não autorizado para este perfil.");
-          await supabase.auth.signOut();
-          void navigate({ to: "/painel/login" });
+          const { error: signOutError } = await supabaseClient.auth.signOut();
+          if (signOutError)
+            console.error("[Painel] Falha ao encerrar sessão sem autorização.", signOutError);
+          setVerificando(false);
+          void navigate({ to: "/painel/login", replace: true });
           return;
         }
         setAutorizado(true);
         setVerificando(false);
-      } catch (e) {
+      } catch (error) {
         if (!ativo) return;
-        concluiu = true;
+        console.error("[Painel] Falha ao verificar autorização.", error);
         toast.error("Erro ao verificar acesso. Faça login novamente.");
-        void navigate({ to: "/painel/login" });
+        setVerificando(false);
+        void navigate({ to: "/painel/login", replace: true });
       }
     }
 
     void verificar();
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       if (!ativo) return;
       if (!session) {
         setAutorizado(false);
-        void navigate({ to: "/painel/login" });
+        void navigate({ to: "/painel/login", replace: true });
       }
     });
-
-    const timeout = setTimeout(() => {
-      if (!ativo || concluiu) return;
-      toast.error("Tempo esgotado ao verificar acesso. Faça login novamente.");
-      void navigate({ to: "/painel/login" });
-    }, 5000);
 
     return () => {
       ativo = false;
       sub.subscription.unsubscribe();
-      clearTimeout(timeout);
     };
   }, [navigate]);
 

@@ -100,8 +100,28 @@ CREATE POLICY "alertas_select_equipe_escola"
         )
     );
 
+CREATE POLICY "alertas_update_equipe_escola"
+    ON public.alertas
+    FOR UPDATE
+    TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1
+            FROM public.equipe_escola AS equipe
+            WHERE equipe.id = (SELECT auth.uid())
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1
+            FROM public.equipe_escola AS equipe
+            WHERE equipe.id = (SELECT auth.uid())
+        )
+    );
+
 GRANT SELECT ON public.equipe_escola TO authenticated;
 GRANT INSERT ON public.sessao, public.registros, public.alertas TO anon, authenticated;
 GRANT SELECT ON public.registros, public.alertas TO authenticated;
+GRANT UPDATE ON public.alertas TO authenticated;
 
 ALTER PUBLICATION supabase_realtime ADD TABLE public.alertas;

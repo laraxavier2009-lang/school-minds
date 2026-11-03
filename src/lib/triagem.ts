@@ -206,10 +206,37 @@ export const PERGUNTAS_POR_TEMA: Record<Tema, Pergunta[]> = {
   ],
 };
 
+export interface ResultadoTriagem {
+  pontuacao: number;
+  nivelRisco: NivelRisco;
+  interromperPorCrise: boolean;
+}
+
+export function calcularTriagem(respostas: number[]): ResultadoTriagem {
+  if (respostas.length === 0) {
+    throw new Error("A triagem precisa ter pelo menos uma resposta.");
+  }
+
+  if (respostas.some((peso) => peso !== 1 && peso !== 2 && peso !== 3)) {
+    throw new RangeError("As respostas da triagem devem ter peso 1, 2 ou 3.");
+  }
+
+  const pontuacao = respostas.reduce((total, peso) => total + peso, 0);
+  const interromperPorCrise = respostas.includes(3);
+
+  if (interromperPorCrise) {
+    return { pontuacao, nivelRisco: "grave", interromperPorCrise: true };
+  }
+
+  const limiteGrave = Math.max(3, respostas.length * 2);
+  const nivelRisco: NivelRisco =
+    pontuacao <= respostas.length ? "leve" : pontuacao >= limiteGrave ? "grave" : "medio";
+
+  return { pontuacao, nivelRisco, interromperPorCrise: false };
+}
+
 export function calcularNivel(pesos: number[]): NivelRisco {
-  if (pesos.includes(3)) return "grave";
-  if (pesos.includes(2)) return "medio";
-  return "leve";
+  return calcularTriagem(pesos).nivelRisco;
 }
 
 export const LABELS_TEMA: Record<Tema, string> = {
