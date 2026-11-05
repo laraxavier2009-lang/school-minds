@@ -186,21 +186,10 @@ export async function listarSessoes(): Promise<SessaoPainel[]> {
 
 export async function atualizarStatusAlerta(
   alertaId: string,
-  anterior: StatusEnum,
   novo: StatusEnum,
 ): Promise<boolean> {
   const { error } = await supabase.from("alertas").update({ status: novo }).eq("id", alertaId);
-  if (error) return false;
-  const { data: sess } = await supabase.auth.getUser();
-  if (sess.user) {
-    await supabase.from("historico_status").insert({
-      alerta_id: alertaId,
-      autor_id: sess.user.id,
-      status_anterior: anterior,
-      status_novo: novo,
-    });
-  }
-  return true;
+  return !error;
 }
 
 export async function criarAnotacao(alertaId: string, texto: string): Promise<boolean> {
