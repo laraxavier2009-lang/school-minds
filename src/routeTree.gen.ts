@@ -9,24 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TemasRouteImport } from './routes/temas'
-import { Route as PrivacidadeRouteImport } from './routes/privacidade'
-import { Route as PainelRouteImport } from './routes/painel'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PainelRouteImport } from './routes/painel'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as TemasRouteImport } from './routes/temas'
 import { Route as PainelIndexRouteImport } from './routes/painel.index'
-import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
-import { Route as ResultadoNivelRouteImport } from './routes/resultado.$nivel'
 import { Route as PainelLoginRouteImport } from './routes/painel.login'
+import { Route as ResultadoNivelRouteImport } from './routes/resultado.$nivel'
+import { Route as TriagemTemaRouteImport } from './routes/triagem.$tema'
 import { Route as PainelGestorLoginRouteImport } from './routes/painel.gestor.login'
 
-const TemasRoute = TemasRouteImport.update({
-  id: '/temas',
-  path: '/temas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacidadeRoute = PrivacidadeRouteImport.update({
-  id: '/privacidade',
-  path: '/privacidade',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PainelRoute = PainelRouteImport.update({
@@ -34,9 +29,14 @@ const PainelRoute = PainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemasRoute = TemasRouteImport.update({
+  id: '/temas',
+  path: '/temas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PainelIndexRoute = PainelIndexRouteImport.update({
@@ -44,20 +44,20 @@ const PainelIndexRoute = PainelIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PainelRoute,
 } as any)
-const TriagemTemaRoute = TriagemTemaRouteImport.update({
-  id: '/triagem/$tema',
-  path: '/triagem/$tema',
-  getParentRoute: () => rootRouteImport,
+const PainelLoginRoute = PainelLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => PainelRoute,
 } as any)
 const ResultadoNivelRoute = ResultadoNivelRouteImport.update({
   id: '/resultado/$nivel',
   path: '/resultado/$nivel',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PainelLoginRoute = PainelLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => PainelRoute,
+const TriagemTemaRoute = TriagemTemaRouteImport.update({
+  id: '/triagem/$tema',
+  path: '/triagem/$tema',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PainelGestorLoginRoute = PainelGestorLoginRouteImport.update({
   id: '/gestor/login',
@@ -144,18 +144,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/temas': {
-      id: '/temas'
-      path: '/temas'
-      fullPath: '/temas'
-      preLoaderRoute: typeof TemasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacidade': {
-      id: '/privacidade'
-      path: '/privacidade'
-      fullPath: '/privacidade'
-      preLoaderRoute: typeof PrivacidadeRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/painel': {
@@ -165,11 +158,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/temas': {
+      id: '/temas'
+      path: '/temas'
+      fullPath: '/temas'
+      preLoaderRoute: typeof TemasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/painel/': {
@@ -179,12 +179,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelIndexRouteImport
       parentRoute: typeof PainelRoute
     }
-    '/triagem/$tema': {
-      id: '/triagem/$tema'
-      path: '/triagem/$tema'
-      fullPath: '/triagem/$tema'
-      preLoaderRoute: typeof TriagemTemaRouteImport
-      parentRoute: typeof rootRouteImport
+    '/painel/login': {
+      id: '/painel/login'
+      path: '/login'
+      fullPath: '/painel/login'
+      preLoaderRoute: typeof PainelLoginRouteImport
+      parentRoute: typeof PainelRoute
     }
     '/resultado/$nivel': {
       id: '/resultado/$nivel'
@@ -193,12 +193,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultadoNivelRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/painel/login': {
-      id: '/painel/login'
-      path: '/login'
-      fullPath: '/painel/login'
-      preLoaderRoute: typeof PainelLoginRouteImport
-      parentRoute: typeof PainelRoute
+    '/triagem/$tema': {
+      id: '/triagem/$tema'
+      path: '/triagem/$tema'
+      fullPath: '/triagem/$tema'
+      preLoaderRoute: typeof TriagemTemaRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/painel/gestor/login': {
       id: '/painel/gestor/login'
