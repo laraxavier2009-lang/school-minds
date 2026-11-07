@@ -9,11 +9,24 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { MuralDesabafos } from "@/components/MuralDesabafos";
 import { supabaseClient } from "@/lib/supabaseClient";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  criarAnotacao,
+  obterAcompanhamentoAlerta,
   obterEstatisticasPortal,
+  type AnotacaoAlerta,
   type EtapaAcessoPortal,
   type EstatisticasPortal,
+  type HistoricoStatusAlerta,
 } from "@/lib/dados";
 import { LABELS_TEMA, type NivelRisco, type Tema } from "@/lib/triagem";
 import type { StatusAlerta } from "@/types/database.types";
@@ -86,6 +99,13 @@ function PainelPage() {
   const [estatisticas, setEstatisticas] = useState<EstatisticasPortal | null>(null);
   const [carregandoEstatisticas, setCarregandoEstatisticas] = useState(true);
   const [erroEstatisticas, setErroEstatisticas] = useState(false);
+  const [alertaSelecionado, setAlertaSelecionado] = useState<AlertaPainel | null>(null);
+  const [anotacoes, setAnotacoes] = useState<AnotacaoAlerta[]>([]);
+  const [historico, setHistorico] = useState<HistoricoStatusAlerta[]>([]);
+  const [carregandoAcompanhamento, setCarregandoAcompanhamento] = useState(false);
+  const [erroAcompanhamento, setErroAcompanhamento] = useState(false);
+  const [textoAnotacao, setTextoAnotacao] = useState("");
+  const [salvandoAnotacao, setSalvandoAnotacao] = useState(false);
 
   const carregarAlertas = useCallback(async () => {
     const { data, error } = await supabaseClient
@@ -117,6 +137,36 @@ function PainelPage() {
   useEffect(() => {
     void carregarEstatisticas();
   }, [carregarEstatisticas]);
+
+  useEffect(() => {
+    if (!alertaSelecionado) return;
+
+    let ativo = true;
+    setCarregandoAcompanhamento(true);
+    setErroAcompanhamento(false);
+    setAnotacoes([]);
+    setHistorico([]);
+
+    void obterAcompanhamentoAlerta(alertaSelecionado.id)
+      .then((acompanhamento) => {
+        if (!ativo) return;
+        setAnotacoes(acompanhamento.anotacoes);
+        setHistorico(acompanhamento.historico);
+      })
+      .catch((error) => {
+        if (!ativo) return;
+        console.error("[Painel] Falha ao carregar o prontuário do alerta.", error);
+        setErroAcompanhamento(true);
+        toast.error("Não foi possível carregar as anotações e o histórico deste alerta.");
+      })
+      .finally(() => {
+        if (ativo) setCarregandoAcompanhamento(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [alertaSelecionado]);
 
   useEffect(() => {
     let ativo = true;
@@ -248,6 +298,41 @@ function PainelPage() {
     void navigate({ to: "/painel/login", replace: true });
   }
 
+  async function adicionarAnotacao() {
+    const texto = textoAnotacao.trim();
+    if (!alertaSelecionado || !texto || salvandoAnotacao) return;
+
+    setSalvandoAnotacao(true);
+    try {
+      const criada = await criarAnotacao(alertaSelecionado.id, texto);
+      if (!criada) {
+        toast.error("Não foi possível salvar a anotação.");
+        return;
+      }
+
+      setTextoAnotacao("");
+      setAnotacoes((atuais) => [
+        { id: crypto.randomUUID(), texto, criado_em: new Date().toISOString() },
+        ...atuais,
+      ]);
+      toast.success("Anotação adicionada.");
+
+      try {
+        const acompanhamento = await obterAcompanhamentoAlerta(alertaSelecionado.id);
+        setAnotacoes(acompanhamento.anotacoes);
+        setHistorico(acompanhamento.historico);
+      } catch (error) {
+        console.error("[Painel] Falha ao atualizar o prontuário após adicionar anotação.", error);
+        toast.warning("Anotação salva, mas não foi possível atualizar o histórico.");
+      }
+    } catch (error) {
+      console.error("[Painel] Falha ao criar anotação.", error);
+      toast.error("Não foi possível salvar a anotação.");
+    } finally {
+      setSalvandoAnotacao(false);
+    }
+  }
+
   return (
     <main
       className="min-h-screen space-y-6 bg-[var(--cor-fundo)] px-4 py-6 sm:px-6 lg:px-8"
@@ -277,6 +362,8 @@ function PainelPage() {
         <Contador titulo="Pendentes" valor={contadores.pendentes} cor="amber" />
         <Contador titulo="Concluídos" valor={contadores.concluidos} cor="green" />
       </section>
+
+      <MuralDesabafos />
 
       <section aria-labelledby="estatisticas-titulo" className="space-y-4">
         <header>
@@ -473,6 +560,16 @@ function PainelPage() {
                         >
                           Concluir
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTextoAnotacao("");
+                            setAlertaSelecionado(alerta);
+                          }}
+                          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                          Ver Detalhes/Anotações
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -482,6 +579,152 @@ function PainelPage() {
           </div>
         )}
       </section>
+
+      <Dialog
+        open={alertaSelecionado !== null}
+        onOpenChange={(aberto) => {
+          if (!aberto) setAlertaSelecionado(null);
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Prontuário e histórico de atendimento</DialogTitle>
+            <DialogDescription>
+              Registro confidencial para acompanhamento pedagógico pela equipe autorizada.
+            </DialogDescription>
+          </DialogHeader>
+
+          {alertaSelecionado && (
+            <div className="space-y-6">
+              <section aria-label="Informações do alerta" className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Tema</h3>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {alertaSelecionado.registros
+                      ? LABELS_TEMA[alertaSelecionado.registros.tema]
+                      : "Registro indisponível"}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Nível de risco
+                  </h3>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {NIVEL_LABEL[alertaSelecionado.nivel]}
+                  </p>
+                </div>
+              </section>
+
+              {carregandoAcompanhamento ? (
+                <p className="text-sm text-slate-600" role="status">
+                  Carregando anotações e histórico…
+                </p>
+              ) : erroAcompanhamento ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAlertaSelecionado({ ...alertaSelecionado });
+                  }}
+                  className="rounded-md border border-red-300 px-3 py-2 text-sm font-bold text-red-800 hover:bg-red-50"
+                >
+                  Tentar carregar novamente
+                </button>
+              ) : (
+                <>
+                  <section aria-labelledby="historico-alerta-titulo" className="space-y-3">
+                    <h3 id="historico-alerta-titulo" className="font-bold text-slate-900">
+                      Linha do tempo do atendimento
+                    </h3>
+                    {historico.length === 0 ? (
+                      <p className="text-sm text-slate-600">Ainda não há alterações de status.</p>
+                    ) : (
+                      <ol className="space-y-3 border-l-2 border-slate-200 pl-4">
+                        {historico.map((item) => (
+                          <li key={item.id} className="relative text-sm">
+                            <span
+                              className="absolute -left-[1.35rem] top-1.5 h-2.5 w-2.5 rounded-full bg-sky-700"
+                              aria-hidden="true"
+                            />
+                            <p className="font-semibold text-slate-800">
+                              {item.status_anterior
+                                ? `${STATUS_LABEL[item.status_anterior]} → `
+                                : ""}
+                              {STATUS_LABEL[item.status_novo]}
+                            </p>
+                            <time className="text-xs text-slate-500" dateTime={item.criado_em}>
+                              {new Date(item.criado_em).toLocaleString("pt-BR")}
+                            </time>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                  </section>
+
+                  <section aria-labelledby="anotacoes-alerta-titulo" className="space-y-3">
+                    <h3 id="anotacoes-alerta-titulo" className="font-bold text-slate-900">
+                      Observações pedagógicas da equipe
+                    </h3>
+                    {anotacoes.length === 0 ? (
+                      <p className="text-sm text-slate-600">
+                        Ainda não há observações registradas.
+                      </p>
+                    ) : (
+                      <ul className="space-y-3" aria-live="polite">
+                        {anotacoes.map((anotacao) => (
+                          <li key={anotacao.id} className="rounded-lg border border-slate-200 p-3">
+                            <p className="whitespace-pre-wrap text-sm text-slate-800">
+                              {anotacao.texto}
+                            </p>
+                            <time
+                              className="mt-2 block text-xs text-slate-500"
+                              dateTime={anotacao.criado_em}
+                            >
+                              {new Date(anotacao.criado_em).toLocaleString("pt-BR")}
+                            </time>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                </>
+              )}
+
+              <form
+                className="space-y-3 border-t border-slate-200 pt-4"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void adicionarAnotacao();
+                }}
+              >
+                <label htmlFor="nova-anotacao" className="block text-sm font-bold text-slate-900">
+                  Adicionar observação pedagógica
+                </label>
+                <Textarea
+                  id="nova-anotacao"
+                  value={textoAnotacao}
+                  onChange={(event) => setTextoAnotacao(event.target.value)}
+                  placeholder="Registre uma observação pertinente ao acompanhamento…"
+                  maxLength={2000}
+                  disabled={salvandoAnotacao}
+                  required
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-slate-500">
+                    Não inclua nomes ou dados de identificação.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={salvandoAnotacao || !textoAnotacao.trim()}
+                    className="rounded-md bg-sky-800 px-4 py-2 text-sm font-bold text-white hover:bg-sky-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {salvandoAnotacao ? "Salvando…" : "Adicionar Anotação"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

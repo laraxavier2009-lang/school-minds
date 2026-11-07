@@ -113,12 +113,13 @@ export interface DesabafoAnonimo {
 }
 
 export async function listarDesabafos(): Promise<DesabafoAnonimo[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("desabafos_anonimos")
     .select("id, texto, tema, criado_em")
     .not("texto", "is", null)
     .order("criado_em", { ascending: false })
     .limit(100);
+  if (error) throw error;
   return (data ?? []).map((d) => ({ ...d, texto: d.texto ?? "" }));
 }
 
@@ -148,6 +149,47 @@ export interface SessaoPainel {
   criado_em: string;
   anotacoes: number;
   ultimaAnotacao: string | null;
+}
+
+export interface AnotacaoAlerta {
+  id: string;
+  texto: string;
+  criado_em: string;
+}
+
+export interface HistoricoStatusAlerta {
+  id: string;
+  status_anterior: StatusEnum | null;
+  status_novo: StatusEnum;
+  criado_em: string;
+}
+
+export interface AcompanhamentoAlerta {
+  anotacoes: AnotacaoAlerta[];
+  historico: HistoricoStatusAlerta[];
+}
+
+export async function obterAcompanhamentoAlerta(alertaId: string): Promise<AcompanhamentoAlerta> {
+  const [anotacoesResult, historicoResult] = await Promise.all([
+    supabaseClient
+      .from("anotacoes")
+      .select("id, texto, criado_em")
+      .eq("alerta_id", alertaId)
+      .order("criado_em", { ascending: false }),
+    supabaseClient
+      .from("historico_status")
+      .select("id, status_anterior, status_novo, criado_em")
+      .eq("alerta_id", alertaId)
+      .order("criado_em", { ascending: false }),
+  ]);
+
+  if (anotacoesResult.error) throw anotacoesResult.error;
+  if (historicoResult.error) throw historicoResult.error;
+
+  return {
+    anotacoes: anotacoesResult.data ?? [],
+    historico: historicoResult.data ?? [],
+  };
 }
 
 export async function listarSessoes(): Promise<SessaoPainel[]> {
@@ -184,19 +226,21 @@ export async function listarSessoes(): Promise<SessaoPainel[]> {
   });
 }
 
-export async function atualizarStatusAlerta(
-  alertaId: string,
-  novo: StatusEnum,
-): Promise<boolean> {
+export async function atualizarStatusAlerta(alertaId: string, novo: StatusEnum): Promise<boolean> {
   const { error } = await supabase.from("alertas").update({ status: novo }).eq("id", alertaId);
   return !error;
 }
 
 export async function criarAnotacao(alertaId: string, texto: string): Promise<boolean> {
-  const { data: sess } = await supabase.auth.getUser();
+  const { data: sess, error: sessionError } = await supabaseClient.auth.getUser();
+  if (sessionError) {
+    console.error("[Painel] Falha ao verificar a sessão para criar anotação.", sessionError);
+    return false;
+  }
   if (!sess.user) return false;
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("anotacoes")
     .insert({ alerta_id: alertaId, autor_id: sess.user.id, texto });
+  if (error) console.error("[Painel] Falha ao salvar anotação.", error);
   return !error;
 }

@@ -2,12 +2,14 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabaseClient } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+import type { CargoEquipe } from "@/types/database.types";
 
 interface Props {
   children: ReactNode;
+  cargosPermitidos?: readonly CargoEquipe[];
 }
 
-export function ProtectedRoute({ children }: Props) {
+export function ProtectedRoute({ children, cargosPermitidos }: Props) {
   const navigate = useNavigate();
   const [autorizado, setAutorizado] = useState(false);
   const [verificando, setVerificando] = useState(true);
@@ -48,7 +50,8 @@ export function ProtectedRoute({ children }: Props) {
           void navigate({ to: "/painel/login", replace: true });
           return;
         }
-        if (!["gestor", "psicologo", "orientador"].includes(equipe.cargo)) {
+        const cargosAutorizados = cargosPermitidos ?? ["gestor", "psicologo", "orientador"];
+        if (!cargosAutorizados.includes(equipe.cargo)) {
           toast.error("Acesso não autorizado para este perfil.");
           const { error: signOutError } = await supabaseClient.auth.signOut();
           if (signOutError)
@@ -82,7 +85,7 @@ export function ProtectedRoute({ children }: Props) {
       ativo = false;
       sub.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [cargosPermitidos, navigate]);
 
   if (verificando || !autorizado) {
     return (
