@@ -155,6 +155,7 @@ export interface AnotacaoAlerta {
   id: string;
   texto: string;
   criado_em: string;
+  autor: string | null;
 }
 
 export interface HistoricoStatusAlerta {
@@ -173,7 +174,7 @@ export async function obterAcompanhamentoAlerta(alertaId: string): Promise<Acomp
   const [anotacoesResult, historicoResult] = await Promise.all([
     supabaseClient
       .from("anotacoes")
-      .select("id, texto, criado_em")
+      .select("id, texto, criado_em, autor_id")
       .eq("alerta_id", alertaId)
       .order("criado_em", { ascending: false }),
     supabaseClient
@@ -186,8 +187,27 @@ export async function obterAcompanhamentoAlerta(alertaId: string): Promise<Acomp
   if (anotacoesResult.error) throw anotacoesResult.error;
   if (historicoResult.error) throw historicoResult.error;
 
+  const anotacoes = anotacoesResult.data ?? [];
+  const autorIds = [...new Set(anotacoes.map((anotacao) => anotacao.autor_id))];
+  const nomesPorAutor = new Map<string, string>();
+  if (autorIds.length > 0) {
+    const { data: equipe, error: equipeError } = await supabaseClient
+      .from("equipe_escola")
+      .select("user_id, nome")
+      .in("user_id", autorIds);
+    if (equipeError) throw equipeError;
+    for (const membro of equipe ?? []) {
+      nomesPorAutor.set(membro.user_id, membro.nome);
+    }
+  }
+
   return {
-    anotacoes: anotacoesResult.data ?? [],
+    anotacoes: anotacoes.map((anotacao) => ({
+      id: anotacao.id,
+      texto: anotacao.texto,
+      criado_em: anotacao.criado_em,
+      autor: nomesPorAutor.get(anotacao.autor_id) ?? null,
+    })),
     historico: historicoResult.data ?? [],
   };
 }

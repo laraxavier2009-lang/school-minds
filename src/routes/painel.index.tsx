@@ -8,28 +8,18 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { GestaoEquipe } from "@/components/GestaoEquipe";
+import { ModalAtendimento } from "@/components/ModalAtendimento";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { MuralDesabafos } from "@/components/MuralDesabafos";
 import { supabaseClient } from "@/lib/supabaseClient";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  criarAnotacao,
-  obterAcompanhamentoAlerta,
   obterEstatisticasPortal,
-  type AnotacaoAlerta,
   type EtapaAcessoPortal,
   type EstatisticasPortal,
-  type HistoricoStatusAlerta,
 } from "@/lib/dados";
 import { LABELS_TEMA, type NivelRisco, type Tema } from "@/lib/triagem";
-import type { StatusAlerta } from "@/types/database.types";
+import type { CargoEquipe, StatusAlerta } from "@/types/database.types";
 
 export const Route = createFileRoute("/painel/")({
   head: () => ({ meta: [{ title: "Painel de Gestão Escolar — Saúde Mental" }] }),
@@ -86,12 +76,20 @@ const NIVEL_COR: Record<NivelRisco, string> = {
   grave: "#C43D3D",
 };
 
+const CARGO_LABEL: Record<CargoEquipe, string> = {
+  gestor: "Gestor",
+  psicologo: "Psicóloga",
+  orientador: "Orientador",
+};
+
 const GRAFICO_CONFIG = {
   total: { label: "Total", color: "#167C80" },
 } satisfies ChartConfig;
 
 function PainelPage() {
   const navigate = useNavigate();
+  const [abaAtiva, setAbaAtiva] = useState<"alertas" | "desabafos" | "equipe">("alertas");
+  const [perfil, setPerfil] = useState<{ nome: string; cargo: CargoEquipe } | null>(null);
   const [alertas, setAlertas] = useState<AlertaPainel[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -99,13 +97,37 @@ function PainelPage() {
   const [estatisticas, setEstatisticas] = useState<EstatisticasPortal | null>(null);
   const [carregandoEstatisticas, setCarregandoEstatisticas] = useState(true);
   const [erroEstatisticas, setErroEstatisticas] = useState(false);
-  const [alertaSelecionado, setAlertaSelecionado] = useState<AlertaPainel | null>(null);
-  const [anotacoes, setAnotacoes] = useState<AnotacaoAlerta[]>([]);
-  const [historico, setHistorico] = useState<HistoricoStatusAlerta[]>([]);
-  const [carregandoAcompanhamento, setCarregandoAcompanhamento] = useState(false);
-  const [erroAcompanhamento, setErroAcompanhamento] = useState(false);
-  const [textoAnotacao, setTextoAnotacao] = useState("");
-  const [salvandoAnotacao, setSalvandoAnotacao] = useState(false);
+  const [alertaSelecionadoId, setAlertaSelecionadoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarPerfil() {
+      try {
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+        if (userError) throw userError;
+        if (!userData.user) throw new Error("Não há usuário autenticado.");
+
+        const { data, error } = await supabaseClient
+          .from("equipe_escola")
+          .select("nome, cargo")
+          .eq("user_id", userData.user.id)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data) throw new Error("O perfil da equipe não foi encontrado.");
+        if (ativo) setPerfil(data);
+      } catch (error) {
+        if (!ativo) return;
+        console.error("[Painel] Falha ao carregar o perfil da equipe.", error);
+        toast.error("Não foi possível carregar o nome e o cargo do usuário.");
+      }
+    }
+
+    void carregarPerfil();
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   const carregarAlertas = useCallback(async () => {
     const { data, error } = await supabaseClient
@@ -137,36 +159,6 @@ function PainelPage() {
   useEffect(() => {
     void carregarEstatisticas();
   }, [carregarEstatisticas]);
-
-  useEffect(() => {
-    if (!alertaSelecionado) return;
-
-    let ativo = true;
-    setCarregandoAcompanhamento(true);
-    setErroAcompanhamento(false);
-    setAnotacoes([]);
-    setHistorico([]);
-
-    void obterAcompanhamentoAlerta(alertaSelecionado.id)
-      .then((acompanhamento) => {
-        if (!ativo) return;
-        setAnotacoes(acompanhamento.anotacoes);
-        setHistorico(acompanhamento.historico);
-      })
-      .catch((error) => {
-        if (!ativo) return;
-        console.error("[Painel] Falha ao carregar o prontuário do alerta.", error);
-        setErroAcompanhamento(true);
-        toast.error("Não foi possível carregar as anotações e o histórico deste alerta.");
-      })
-      .finally(() => {
-        if (ativo) setCarregandoAcompanhamento(false);
-      });
-
-    return () => {
-      ativo = false;
-    };
-  }, [alertaSelecionado]);
 
   useEffect(() => {
     let ativo = true;
@@ -298,41 +290,6 @@ function PainelPage() {
     void navigate({ to: "/painel/login", replace: true });
   }
 
-  async function adicionarAnotacao() {
-    const texto = textoAnotacao.trim();
-    if (!alertaSelecionado || !texto || salvandoAnotacao) return;
-
-    setSalvandoAnotacao(true);
-    try {
-      const criada = await criarAnotacao(alertaSelecionado.id, texto);
-      if (!criada) {
-        toast.error("Não foi possível salvar a anotação.");
-        return;
-      }
-
-      setTextoAnotacao("");
-      setAnotacoes((atuais) => [
-        { id: crypto.randomUUID(), texto, criado_em: new Date().toISOString() },
-        ...atuais,
-      ]);
-      toast.success("Anotação adicionada.");
-
-      try {
-        const acompanhamento = await obterAcompanhamentoAlerta(alertaSelecionado.id);
-        setAnotacoes(acompanhamento.anotacoes);
-        setHistorico(acompanhamento.historico);
-      } catch (error) {
-        console.error("[Painel] Falha ao atualizar o prontuário após adicionar anotação.", error);
-        toast.warning("Anotação salva, mas não foi possível atualizar o histórico.");
-      }
-    } catch (error) {
-      console.error("[Painel] Falha ao criar anotação.", error);
-      toast.error("Não foi possível salvar a anotação.");
-    } finally {
-      setSalvandoAnotacao(false);
-    }
-  }
-
   return (
     <main
       className="min-h-screen space-y-6 bg-[var(--cor-fundo)] px-4 py-6 sm:px-6 lg:px-8"
@@ -343,388 +300,343 @@ function PainelPage() {
           <p className="text-sm font-bold uppercase tracking-wide text-sky-800">
             Saúde Mental na Escola
           </p>
-          <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">Painel de alertas</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">Painel da Escola</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Acompanhe os pedidos de atenção enviados à equipe escolar.
+            Acompanhe alertas, triagens e recursos de acolhimento da escola.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void sair()}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
-        >
-          Sair
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="rounded-full border border-[var(--cor-primaria)]/20 bg-white px-4 py-2 text-sm font-bold text-[var(--cor-primaria)] shadow-sm">
+            {perfil ? `${perfil.nome} | ${CARGO_LABEL[perfil.cargo]}` : "Carregando perfil…"}
+          </span>
+          <button
+            type="button"
+            onClick={() => void sair()}
+            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Sair
+          </button>
+        </div>
       </header>
 
-      <section aria-label="Resumo dos alertas" className="grid gap-4 sm:grid-cols-3">
-        <Contador titulo="Total de alertas" valor={contadores.total} cor="sky" />
-        <Contador titulo="Pendentes" valor={contadores.pendentes} cor="amber" />
-        <Contador titulo="Concluídos" valor={contadores.concluidos} cor="green" />
-      </section>
-
-      <MuralDesabafos />
-
-      <section aria-labelledby="estatisticas-titulo" className="space-y-4">
-        <header>
-          <h2 id="estatisticas-titulo" className="text-xl font-extrabold text-slate-900">
-            Atividade anônima do portal estudantil
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Totais por etapa e nível de atenção, sem nomes, e-mails ou respostas individuais.
-          </p>
-        </header>
-
-        {erroEstatisticas && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-800">
-            Não foi possível carregar as estatísticas anônimas.
-            <button
-              type="button"
-              onClick={() => void carregarEstatisticas()}
-              className="rounded-md border border-red-300 px-3 py-1.5 hover:bg-red-100"
-            >
-              Atualizar
-            </button>
-          </div>
-        )}
-
-        <section aria-label="Triagens por nível" className="grid gap-3 sm:grid-cols-3">
-          <Contador titulo="Nível leve" valor={totalPorNivel("leve")} cor="green" />
-          <Contador titulo="Nível médio" valor={totalPorNivel("medio")} cor="amber" />
-          <Contador titulo="Nível grave" valor={totalPorNivel("grave")} cor="red" />
-        </section>
-
-        {carregandoEstatisticas && !estatisticas ? (
-          <p
-            className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600"
-            role="status"
-          >
-            Carregando estatísticas anônimas…
-          </p>
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
-            <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <h3 className="font-extrabold text-slate-900">Acessos por etapa</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Visitas registradas após continuar no portal.
-              </p>
-              <ChartContainer config={GRAFICO_CONFIG} className="mt-3 h-[240px] w-full aspect-auto">
-                <BarChart data={dadosAcessos} margin={{ top: 24, right: 12, bottom: 4, left: 0 }}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis dataKey="etapa" tickLine={false} axisLine={false} />
-                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={32} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]}>
-                    <LabelList dataKey="total" position="top" />
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            </section>
-
-            <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <h3 className="font-extrabold text-slate-900">Triagens por nível de atenção</h3>
-              <p className="mt-1 text-sm text-slate-600">Cada resultado concluído conta uma vez.</p>
-              <ChartContainer config={GRAFICO_CONFIG} className="mt-3 h-[240px] w-full aspect-auto">
-                <BarChart data={dadosNiveis} margin={{ top: 24, right: 12, bottom: 4, left: 0 }}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="nivel"
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(nivel: NivelRisco) => NIVEL_LABEL[nivel]}
-                  />
-                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={32} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="total" radius={[4, 4, 0, 0]}>
-                    {dadosNiveis.map(({ nivel }) => (
-                      <Cell key={nivel} fill={NIVEL_COR[nivel]} />
-                    ))}
-                    <LabelList dataKey="total" position="top" />
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            </section>
-          </div>
-        )}
-      </section>
-
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-4 py-4 sm:px-6">
-          <h2 className="text-lg font-extrabold text-slate-900">Alertas ativos</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Os alertas concluídos continuam contabilizados no resumo.
-          </p>
-        </div>
-
-        {erro && (
-          <div
-            className="m-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-800"
-            role="alert"
-          >
-            {erro}
-            <button
-              type="button"
-              onClick={() => {
-                setCarregando(true);
-                void carregarAlertas()
-                  .then(() => setErro(null))
-                  .catch((error) => {
-                    console.error("[Painel] Falha ao tentar novamente carregar alertas.", error);
-                    setErro("Não foi possível carregar os alertas. Tente atualizar a página.");
-                  })
-                  .finally(() => setCarregando(false));
-              }}
-              className="rounded-md border border-red-300 px-3 py-1.5 hover:bg-red-100"
-            >
-              Tentar novamente
-            </button>
-          </div>
-        )}
-
-        {carregando ? (
-          <p className="p-6 text-center text-sm text-slate-600" role="status">
-            Carregando alertas…
-          </p>
-        ) : !erro && alertasAtivos.length === 0 ? (
-          <p className="p-6 text-center text-sm text-slate-600">
-            Não há alertas ativos no momento.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
-                <tr>
-                  <th scope="col" className="px-4 py-3 sm:px-6">
-                    Tema
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    Nível
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    Status
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    Emitido
-                  </th>
-                  <th scope="col" className="px-4 py-3 sm:px-6">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {alertasAtivos.map((alerta) => (
-                  <tr key={alerta.id} className="align-middle">
-                    <td className="px-4 py-4 font-bold text-slate-900 sm:px-6">
-                      {alerta.registros
-                        ? LABELS_TEMA[alerta.registros.tema]
-                        : "Registro indisponível"}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                          alerta.nivel === "grave"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-amber-100 text-amber-900"
-                        }`}
-                      >
-                        {alerta.nivel === "grave" ? "Grave" : "Médio"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_CLASS[alerta.status]}`}
-                      >
-                        {STATUS_LABEL[alerta.status]}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {new Date(alerta.emitido_em).toLocaleString("pt-BR")}
-                    </td>
-                    <td className="px-4 py-4 sm:px-6">
-                      <div className="flex flex-wrap gap-2">
-                        {alerta.status === "pendente" && (
-                          <button
-                            type="button"
-                            disabled={atualizandoId !== null}
-                            onClick={() => void alterarStatus(alerta, "em_atendimento")}
-                            className="rounded-md bg-blue-700 px-3 py-2 text-xs font-bold text-white hover:bg-blue-800 disabled:opacity-50"
-                          >
-                            Assumir
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          disabled={atualizandoId !== null}
-                          onClick={() => void alterarStatus(alerta, "concluido")}
-                          className="rounded-md bg-green-700 px-3 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50"
-                        >
-                          Concluir
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTextoAnotacao("");
-                            setAlertaSelecionado(alerta);
-                          }}
-                          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-                        >
-                          Ver Detalhes/Anotações
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <Dialog
-        open={alertaSelecionado !== null}
-        onOpenChange={(aberto) => {
-          if (!aberto) setAlertaSelecionado(null);
-        }}
+      <nav
+        aria-label="Seções do painel"
+        className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm"
+        role="tablist"
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Prontuário e histórico de atendimento</DialogTitle>
-            <DialogDescription>
-              Registro confidencial para acompanhamento pedagógico pela equipe autorizada.
-            </DialogDescription>
-          </DialogHeader>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={abaAtiva === "alertas"}
+          aria-controls="painel-tabpanel-alertas"
+          onClick={() => setAbaAtiva("alertas")}
+          className={`rounded-xl px-4 py-2.5 text-sm font-extrabold transition-colors ${
+            abaAtiva === "alertas"
+              ? "bg-[var(--cor-primaria)] text-white"
+              : "bg-white text-[var(--cor-primaria)] hover:bg-[var(--cor-fundo)]"
+          }`}
+        >
+          📊 Alertas &amp; Triagens
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={abaAtiva === "desabafos"}
+          aria-controls="painel-tabpanel-desabafos"
+          onClick={() => setAbaAtiva("desabafos")}
+          className={`rounded-xl px-4 py-2.5 text-sm font-extrabold transition-colors ${
+            abaAtiva === "desabafos"
+              ? "bg-[var(--cor-primaria)] text-white"
+              : "bg-white text-[var(--cor-primaria)] hover:bg-[var(--cor-fundo)]"
+          }`}
+        >
+          💬 Mural de Desabafos
+        </button>
+        {perfil?.cargo === "gestor" && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={abaAtiva === "equipe"}
+            aria-controls="painel-tabpanel-equipe"
+            onClick={() => setAbaAtiva("equipe")}
+            className={`rounded-xl px-4 py-2.5 text-sm font-extrabold transition-colors ${
+              abaAtiva === "equipe"
+                ? "bg-[var(--cor-primaria)] text-white"
+                : "bg-white text-[var(--cor-primaria)] hover:bg-[var(--cor-fundo)]"
+            }`}
+          >
+            👥 Gestão de Equipe
+          </button>
+        )}
+      </nav>
 
-          {alertaSelecionado && (
-            <div className="space-y-6">
-              <section aria-label="Informações do alerta" className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">Tema</h3>
-                  <p className="mt-1 font-semibold text-slate-900">
-                    {alertaSelecionado.registros
-                      ? LABELS_TEMA[alertaSelecionado.registros.tema]
-                      : "Registro indisponível"}
-                  </p>
-                </div>
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Nível de risco
-                  </h3>
-                  <p className="mt-1 font-semibold text-slate-900">
-                    {NIVEL_LABEL[alertaSelecionado.nivel]}
-                  </p>
-                </div>
-              </section>
+      {abaAtiva === "alertas" && (
+        <div
+          id="painel-tabpanel-alertas"
+          role="tabpanel"
+          aria-label="Alertas e triagens"
+          className="space-y-6"
+        >
+          <section aria-label="Resumo dos alertas" className="grid gap-4 sm:grid-cols-3">
+            <Contador titulo="Total de alertas" valor={contadores.total} cor="sky" />
+            <Contador titulo="Pendentes" valor={contadores.pendentes} cor="amber" />
+            <Contador titulo="Concluídos" valor={contadores.concluidos} cor="green" />
+          </section>
 
-              {carregandoAcompanhamento ? (
-                <p className="text-sm text-slate-600" role="status">
-                  Carregando anotações e histórico…
-                </p>
-              ) : erroAcompanhamento ? (
+          <section aria-labelledby="estatisticas-titulo" className="space-y-4">
+            <header>
+              <h2 id="estatisticas-titulo" className="text-xl font-extrabold text-slate-900">
+                Atividade anônima do portal estudantil
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Totais por etapa e nível de atenção, sem nomes, e-mails ou respostas individuais.
+              </p>
+            </header>
+
+            {erroEstatisticas && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-800">
+                Não foi possível carregar as estatísticas anônimas.
+                <button
+                  type="button"
+                  onClick={() => void carregarEstatisticas()}
+                  className="rounded-md border border-red-300 px-3 py-1.5 hover:bg-red-100"
+                >
+                  Atualizar
+                </button>
+              </div>
+            )}
+
+            <section aria-label="Triagens por nível" className="grid gap-3 sm:grid-cols-3">
+              <Contador titulo="Nível leve" valor={totalPorNivel("leve")} cor="green" />
+              <Contador titulo="Nível médio" valor={totalPorNivel("medio")} cor="amber" />
+              <Contador titulo="Nível grave" valor={totalPorNivel("grave")} cor="red" />
+            </section>
+
+            {carregandoEstatisticas && !estatisticas ? (
+              <p
+                className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-600"
+                role="status"
+              >
+                Carregando estatísticas anônimas…
+              </p>
+            ) : (
+              <div className="grid gap-4 lg:grid-cols-2">
+                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                  <h3 className="font-extrabold text-slate-900">Acessos por etapa</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Visitas registradas após continuar no portal.
+                  </p>
+                  <ChartContainer
+                    config={GRAFICO_CONFIG}
+                    className="mt-3 h-[240px] w-full aspect-auto"
+                  >
+                    <BarChart
+                      data={dadosAcessos}
+                      margin={{ top: 24, right: 12, bottom: 4, left: 0 }}
+                    >
+                      <CartesianGrid vertical={false} />
+                      <XAxis dataKey="etapa" tickLine={false} axisLine={false} />
+                      <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={32} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="total" position="top" />
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                </section>
+
+                <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                  <h3 className="font-extrabold text-slate-900">Triagens por nível de atenção</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Cada resultado concluído conta uma vez.
+                  </p>
+                  <ChartContainer
+                    config={GRAFICO_CONFIG}
+                    className="mt-3 h-[240px] w-full aspect-auto"
+                  >
+                    <BarChart
+                      data={dadosNiveis}
+                      margin={{ top: 24, right: 12, bottom: 4, left: 0 }}
+                    >
+                      <CartesianGrid vertical={false} />
+                      <XAxis
+                        dataKey="nivel"
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(nivel: NivelRisco) => NIVEL_LABEL[nivel]}
+                      />
+                      <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={32} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="total" radius={[4, 4, 0, 0]}>
+                        {dadosNiveis.map(({ nivel }) => (
+                          <Cell key={nivel} fill={NIVEL_COR[nivel]} />
+                        ))}
+                        <LabelList dataKey="total" position="top" />
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                </section>
+              </div>
+            )}
+          </section>
+
+          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-200 px-4 py-4 sm:px-6">
+              <h2 className="text-lg font-extrabold text-slate-900">Alertas ativos</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Os alertas concluídos continuam contabilizados no resumo.
+              </p>
+            </div>
+
+            {erro && (
+              <div
+                className="m-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-800"
+                role="alert"
+              >
+                {erro}
                 <button
                   type="button"
                   onClick={() => {
-                    setAlertaSelecionado({ ...alertaSelecionado });
+                    setCarregando(true);
+                    void carregarAlertas()
+                      .then(() => setErro(null))
+                      .catch((error) => {
+                        console.error(
+                          "[Painel] Falha ao tentar novamente carregar alertas.",
+                          error,
+                        );
+                        setErro("Não foi possível carregar os alertas. Tente atualizar a página.");
+                      })
+                      .finally(() => setCarregando(false));
                   }}
-                  className="rounded-md border border-red-300 px-3 py-2 text-sm font-bold text-red-800 hover:bg-red-50"
+                  className="rounded-md border border-red-300 px-3 py-1.5 hover:bg-red-100"
                 >
-                  Tentar carregar novamente
+                  Tentar novamente
                 </button>
-              ) : (
-                <>
-                  <section aria-labelledby="historico-alerta-titulo" className="space-y-3">
-                    <h3 id="historico-alerta-titulo" className="font-bold text-slate-900">
-                      Linha do tempo do atendimento
-                    </h3>
-                    {historico.length === 0 ? (
-                      <p className="text-sm text-slate-600">Ainda não há alterações de status.</p>
-                    ) : (
-                      <ol className="space-y-3 border-l-2 border-slate-200 pl-4">
-                        {historico.map((item) => (
-                          <li key={item.id} className="relative text-sm">
-                            <span
-                              className="absolute -left-[1.35rem] top-1.5 h-2.5 w-2.5 rounded-full bg-sky-700"
-                              aria-hidden="true"
-                            />
-                            <p className="font-semibold text-slate-800">
-                              {item.status_anterior
-                                ? `${STATUS_LABEL[item.status_anterior]} → `
-                                : ""}
-                              {STATUS_LABEL[item.status_novo]}
-                            </p>
-                            <time className="text-xs text-slate-500" dateTime={item.criado_em}>
-                              {new Date(item.criado_em).toLocaleString("pt-BR")}
-                            </time>
-                          </li>
-                        ))}
-                      </ol>
-                    )}
-                  </section>
+              </div>
+            )}
 
-                  <section aria-labelledby="anotacoes-alerta-titulo" className="space-y-3">
-                    <h3 id="anotacoes-alerta-titulo" className="font-bold text-slate-900">
-                      Observações pedagógicas da equipe
-                    </h3>
-                    {anotacoes.length === 0 ? (
-                      <p className="text-sm text-slate-600">
-                        Ainda não há observações registradas.
-                      </p>
-                    ) : (
-                      <ul className="space-y-3" aria-live="polite">
-                        {anotacoes.map((anotacao) => (
-                          <li key={anotacao.id} className="rounded-lg border border-slate-200 p-3">
-                            <p className="whitespace-pre-wrap text-sm text-slate-800">
-                              {anotacao.texto}
-                            </p>
-                            <time
-                              className="mt-2 block text-xs text-slate-500"
-                              dateTime={anotacao.criado_em}
+            {carregando ? (
+              <p className="p-6 text-center text-sm text-slate-600" role="status">
+                Carregando alertas…
+              </p>
+            ) : !erro && alertasAtivos.length === 0 ? (
+              <p className="p-6 text-center text-sm text-slate-600">
+                Não há alertas ativos no momento.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
+                    <tr>
+                      <th scope="col" className="px-4 py-3 sm:px-6">
+                        Tema
+                      </th>
+                      <th scope="col" className="px-4 py-3">
+                        Nível
+                      </th>
+                      <th scope="col" className="px-4 py-3">
+                        Status
+                      </th>
+                      <th scope="col" className="px-4 py-3">
+                        Emitido
+                      </th>
+                      <th scope="col" className="px-4 py-3 sm:px-6">
+                        Ações
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {alertasAtivos.map((alerta) => (
+                      <tr key={alerta.id} className="align-middle">
+                        <td className="px-4 py-4 font-bold text-slate-900 sm:px-6">
+                          {alerta.registros
+                            ? LABELS_TEMA[alerta.registros.tema]
+                            : "Registro indisponível"}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                              alerta.nivel === "grave"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-amber-100 text-amber-900"
+                            }`}
+                          >
+                            {alerta.nivel === "grave" ? "Grave" : "Médio"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_CLASS[alerta.status]}`}
+                          >
+                            {STATUS_LABEL[alerta.status]}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-4 text-slate-600">
+                          {new Date(alerta.emitido_em).toLocaleString("pt-BR")}
+                        </td>
+                        <td className="px-4 py-4 sm:px-6">
+                          <div className="flex flex-wrap gap-2">
+                            {alerta.status === "pendente" && (
+                              <button
+                                type="button"
+                                disabled={atualizandoId !== null}
+                                onClick={() => void alterarStatus(alerta, "em_atendimento")}
+                                className="rounded-md bg-blue-700 px-3 py-2 text-xs font-bold text-white hover:bg-blue-800 disabled:opacity-50"
+                              >
+                                Assumir
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              disabled={atualizandoId !== null}
+                              onClick={() => void alterarStatus(alerta, "concluido")}
+                              className="rounded-md bg-green-700 px-3 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50"
                             >
-                              {new Date(anotacao.criado_em).toLocaleString("pt-BR")}
-                            </time>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </section>
-                </>
-              )}
+                              Concluir
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setAlertaSelecionadoId(alerta.id)}
+                              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                            >
+                              📋 Ver Atendimento
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
 
-              <form
-                className="space-y-3 border-t border-slate-200 pt-4"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void adicionarAnotacao();
-                }}
-              >
-                <label htmlFor="nova-anotacao" className="block text-sm font-bold text-slate-900">
-                  Adicionar observação pedagógica
-                </label>
-                <Textarea
-                  id="nova-anotacao"
-                  value={textoAnotacao}
-                  onChange={(event) => setTextoAnotacao(event.target.value)}
-                  placeholder="Registre uma observação pertinente ao acompanhamento…"
-                  maxLength={2000}
-                  disabled={salvandoAnotacao}
-                  required
-                />
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-slate-500">
-                    Não inclua nomes ou dados de identificação.
-                  </p>
-                  <button
-                    type="submit"
-                    disabled={salvandoAnotacao || !textoAnotacao.trim()}
-                    className="rounded-md bg-sky-800 px-4 py-2 text-sm font-bold text-white hover:bg-sky-900 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {salvandoAnotacao ? "Salvando…" : "Adicionar Anotação"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {abaAtiva === "desabafos" && (
+        <div id="painel-tabpanel-desabafos" role="tabpanel" aria-label="Mural de desabafos">
+          <MuralDesabafos />
+        </div>
+      )}
+
+      {abaAtiva === "equipe" && perfil?.cargo === "gestor" && (
+        <div id="painel-tabpanel-equipe" role="tabpanel" aria-label="Gestão de equipe">
+          <GestaoEquipe />
+        </div>
+      )}
+
+      <ModalAtendimento
+        alertaId={alertaSelecionadoId}
+        isOpen={alertaSelecionadoId !== null}
+        onClose={() => setAlertaSelecionadoId(null)}
+        onUpdate={() => {
+          void carregarAlertas().catch((error) => {
+            console.error("[Painel] Falha ao atualizar alertas após anotação.", error);
+            toast.error("A anotação foi salva, mas os alertas não puderam ser atualizados.");
+          });
+        }}
+      />
     </main>
   );
 }
