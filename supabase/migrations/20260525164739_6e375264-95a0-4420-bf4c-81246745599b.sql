@@ -3,8 +3,14 @@ DO $$ BEGIN
   CREATE TYPE public.tema_enum AS ENUM ('ansiedade','tristeza','bullying','luto','estresse','pedir_ajuda');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
-CREATE TYPE nivel_enum AS ENUM ('leve','medio','grave');
-CREATE TYPE status_enum AS ENUM ('pendente','em_atendimento','concluido','nao_localizado');
+DO $$ BEGIN
+  CREATE TYPE public.nivel_enum AS ENUM ('leve','medio','grave');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE TYPE public.status_enum AS ENUM ('pendente','em_atendimento','concluido','nao_localizado');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE public.registros (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
