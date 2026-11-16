@@ -46,6 +46,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_alertas_atualizado_em ON public.alertas;
 CREATE TRIGGER trg_alertas_atualizado_em
 BEFORE UPDATE ON public.alertas
 FOR EACH ROW EXECUTE FUNCTION public.tg_set_atualizado_em();
