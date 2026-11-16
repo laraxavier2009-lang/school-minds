@@ -1,12 +1,13 @@
-
 DO $$ BEGIN
   CREATE TYPE public.tema_enum AS ENUM ('ansiedade','tristeza','bullying','luto','estresse','pedir_ajuda');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+
 DO $$ BEGIN
   CREATE TYPE public.nivel_enum AS ENUM ('leve','medio','grave');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+
 DO $$ BEGIN
   CREATE TYPE public.status_enum AS ENUM ('pendente','em_atendimento','concluido','nao_localizado');
 EXCEPTION WHEN duplicate_object THEN NULL;
@@ -31,11 +32,20 @@ CREATE TABLE IF NOT EXISTS public.alertas (
 ALTER TABLE public.registros ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.alertas ENABLE ROW LEVEL SECURITY;
 
+-- Proteção das Políticas de Segurança (RLS)
+DROP POLICY IF EXISTS "Qualquer um cria registros" ON public.registros;
 CREATE POLICY "Qualquer um cria registros" ON public.registros FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Autenticados leem registros" ON public.registros;
 CREATE POLICY "Autenticados leem registros" ON public.registros FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Qualquer um cria alertas" ON public.alertas;
 CREATE POLICY "Qualquer um cria alertas" ON public.alertas FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Autenticados leem alertas" ON public.alertas;
 CREATE POLICY "Autenticados leem alertas" ON public.alertas FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Autenticados atualizam alertas" ON public.alertas;
 CREATE POLICY "Autenticados atualizam alertas" ON public.alertas FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
 CREATE OR REPLACE FUNCTION public.tg_set_atualizado_em()
@@ -52,6 +62,7 @@ BEFORE UPDATE ON public.alertas
 FOR EACH ROW EXECUTE FUNCTION public.tg_set_atualizado_em();
 
 ALTER TABLE public.alertas REPLICA IDENTITY FULL;
+
 DO $$ BEGIN
   ALTER PUBLICATION supabase_realtime ADD TABLE public.alertas;
 EXCEPTION WHEN duplicate_object THEN NULL;
