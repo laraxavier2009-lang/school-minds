@@ -52,4 +52,7 @@ BEFORE UPDATE ON public.alertas
 FOR EACH ROW EXECUTE FUNCTION public.tg_set_atualizado_em();
 
 ALTER TABLE public.alertas REPLICA IDENTITY FULL;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.alertas;
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.alertas;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
