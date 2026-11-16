@@ -1,32 +1,29 @@
-name: Deploy Supabase migrations
+name: Deploy Supabase Migrations
 
 on:
   push:
     branches:
       - main
-
-permissions:
-  contents: read
+      - master
+    paths:
+      - 'supabase/migrations/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Baixar código do repositório
         uses: actions/checkout@v4
 
-      - name: Set up Supabase CLI
+      - name: Configurar Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: Link Supabase project
-        run: supabase link --project-ref pqvuvxgtoqpyvebzozfz --password "$SUPABASE_DB_PASSWORD"
+      - name: Aplicar Migrações no Supabase
+        run: |
+          supabase link --project-ref dwzjzjqjyolxwmenjlwg
+          supabase db push
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-      - name: Push database migrations
-        run: supabase db push --linked --yes
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
