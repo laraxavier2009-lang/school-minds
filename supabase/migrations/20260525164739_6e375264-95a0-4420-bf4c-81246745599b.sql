@@ -12,14 +12,14 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
-CREATE TABLE public.registros (
+CREATE TABLE IF NOT EXISTS public.registros (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tema tema_enum NOT NULL,
   nivel_risco nivel_enum NOT NULL,
   criado_em timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.alertas (
+CREATE TABLE IF NOT EXISTS public.alertas (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   registro_id uuid NOT NULL REFERENCES public.registros(id) ON DELETE CASCADE,
   status status_enum NOT NULL DEFAULT 'pendente',
