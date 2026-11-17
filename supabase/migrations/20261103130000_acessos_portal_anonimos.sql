@@ -2,7 +2,7 @@ ALTER TABLE public.registros
   ALTER COLUMN pontuacao_total DROP NOT NULL,
   ALTER COLUMN pontuacao_total DROP DEFAULT;
 
-CREATE TABLE public.acessos_portal (
+CREATE TABLE IF NOT EXISTS public.acessos_portal (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   etapa text NOT NULL CHECK (etapa IN ('portal', 'temas', 'triagem', 'resultado')),
   tema public.tema_enum,
@@ -23,9 +23,11 @@ CREATE INDEX acessos_portal_nivel_data_idx
 
 ALTER TABLE public.acessos_portal ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS acessos_portal_insert_anon_authenticated ON public.acessos_portal;
 CREATE POLICY acessos_portal_insert_anon_authenticated
   ON public.acessos_portal FOR INSERT TO anon, authenticated
   WITH CHECK (true);
+DROP POLICY IF EXISTS acessos_portal_select_equipe_escola ON public.acessos_portal;
 CREATE POLICY acessos_portal_select_equipe_escola
   ON public.acessos_portal FOR SELECT TO authenticated
   USING (EXISTS (

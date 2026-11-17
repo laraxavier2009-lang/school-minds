@@ -239,6 +239,7 @@ CREATE POLICY alertas_update_equipe_escola
 DROP POLICY IF EXISTS sessao_insert_anon_authenticated ON public.sessao;
 CREATE POLICY sessao_insert_anon_authenticated
   ON public.sessao FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS sessao_select_equipe_escola ON public.sessao;
 CREATE POLICY sessao_select_equipe_escola
   ON public.sessao FOR SELECT TO authenticated
   USING (EXISTS (
@@ -248,8 +249,10 @@ CREATE POLICY sessao_select_equipe_escola
 
 DROP POLICY IF EXISTS "Qualquer um cria respostas" ON public.respostas;
 DROP POLICY IF EXISTS "Autenticados leem respostas" ON public.respostas;
+DROP POLICY IF EXISTS respostas_insert_anon_authenticated ON public.respostas;
 CREATE POLICY respostas_insert_anon_authenticated
   ON public.respostas FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS respostas_select_equipe_escola ON public.respostas;
 CREATE POLICY respostas_select_equipe_escola
   ON public.respostas FOR SELECT TO authenticated
   USING (EXISTS (
@@ -261,12 +264,14 @@ DROP POLICY IF EXISTS "Autenticados leem anotacoes" ON public.anotacoes;
 DROP POLICY IF EXISTS "Autor cria anotacao" ON public.anotacoes;
 DROP POLICY IF EXISTS "Autor edita a propria anotacao" ON public.anotacoes;
 DROP POLICY IF EXISTS "Autor apaga a propria anotacao" ON public.anotacoes;
+DROP POLICY IF EXISTS anotacoes_select_equipe_escola ON public.anotacoes;
 CREATE POLICY anotacoes_select_equipe_escola
   ON public.anotacoes FOR SELECT TO authenticated
   USING (EXISTS (
     SELECT 1 FROM public.equipe_escola AS equipe
     WHERE equipe.user_id = (SELECT auth.uid())
   ));
+DROP POLICY IF EXISTS anotacoes_insert_proprio_autor ON public.anotacoes;
 CREATE POLICY anotacoes_insert_proprio_autor
   ON public.anotacoes FOR INSERT TO authenticated
   WITH CHECK (
@@ -276,6 +281,7 @@ CREATE POLICY anotacoes_insert_proprio_autor
       WHERE equipe.user_id = (SELECT auth.uid())
     )
   );
+DROP POLICY IF EXISTS anotacoes_update_proprio_autor ON public.anotacoes;
 CREATE POLICY anotacoes_update_proprio_autor
   ON public.anotacoes FOR UPDATE TO authenticated
   USING (
@@ -292,6 +298,7 @@ CREATE POLICY anotacoes_update_proprio_autor
       WHERE equipe.user_id = (SELECT auth.uid())
     )
   );
+DROP POLICY IF EXISTS anotacoes_delete_proprio_autor ON public.anotacoes;
 CREATE POLICY anotacoes_delete_proprio_autor
   ON public.anotacoes FOR DELETE TO authenticated
   USING (
@@ -304,12 +311,14 @@ CREATE POLICY anotacoes_delete_proprio_autor
 
 DROP POLICY IF EXISTS "Autenticados leem historico" ON public.historico_status;
 DROP POLICY IF EXISTS "Autenticados registram historico" ON public.historico_status;
+DROP POLICY IF EXISTS historico_status_select_equipe_escola ON public.historico_status;
 CREATE POLICY historico_status_select_equipe_escola
   ON public.historico_status FOR SELECT TO authenticated
   USING (EXISTS (
     SELECT 1 FROM public.equipe_escola AS equipe
     WHERE equipe.user_id = (SELECT auth.uid())
   ));
+DROP POLICY IF EXISTS historico_status_insert_equipe_escola ON public.historico_status;
 CREATE POLICY historico_status_insert_equipe_escola
   ON public.historico_status FOR INSERT TO authenticated
   WITH CHECK (
@@ -323,14 +332,17 @@ CREATE POLICY historico_status_insert_equipe_escola
 DROP POLICY IF EXISTS "Contatos ativos sao publicos" ON public.contatos_apoio;
 DROP POLICY IF EXISTS "Autenticados criam contatos" ON public.contatos_apoio;
 DROP POLICY IF EXISTS "Autenticados editam contatos" ON public.contatos_apoio;
+DROP POLICY IF EXISTS contatos_apoio_select_ativos ON public.contatos_apoio;
 CREATE POLICY contatos_apoio_select_ativos
   ON public.contatos_apoio FOR SELECT TO anon, authenticated USING (ativo = true);
+DROP POLICY IF EXISTS contatos_apoio_insert_equipe_escola ON public.contatos_apoio;
 CREATE POLICY contatos_apoio_insert_equipe_escola
   ON public.contatos_apoio FOR INSERT TO authenticated
   WITH CHECK (EXISTS (
     SELECT 1 FROM public.equipe_escola AS equipe
     WHERE equipe.user_id = (SELECT auth.uid())
   ));
+DROP POLICY IF EXISTS contatos_apoio_update_equipe_escola ON public.contatos_apoio;
 CREATE POLICY contatos_apoio_update_equipe_escola
   ON public.contatos_apoio FOR UPDATE TO authenticated
   USING (EXISTS (
@@ -344,8 +356,10 @@ CREATE POLICY contatos_apoio_update_equipe_escola
 
 DROP POLICY IF EXISTS "Qualquer um cria desabafo" ON public.desabafos_anonimos;
 DROP POLICY IF EXISTS "Autenticados leem desabafos" ON public.desabafos_anonimos;
+DROP POLICY IF EXISTS desabafos_insert_anon_authenticated ON public.desabafos_anonimos;
 CREATE POLICY desabafos_insert_anon_authenticated
   ON public.desabafos_anonimos FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS desabafos_select_equipe_escola ON public.desabafos_anonimos;
 CREATE POLICY desabafos_select_equipe_escola
   ON public.desabafos_anonimos FOR SELECT TO authenticated
   USING (EXISTS (
@@ -353,6 +367,7 @@ CREATE POLICY desabafos_select_equipe_escola
     WHERE equipe.user_id = (SELECT auth.uid())
   ));
 
+DROP POLICY IF EXISTS registro_estatistico_select_equipe_escola ON public.registro_estatistico;
 CREATE POLICY registro_estatistico_select_equipe_escola
   ON public.registro_estatistico FOR SELECT TO authenticated
   USING (EXISTS (

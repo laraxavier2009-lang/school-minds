@@ -21,8 +21,10 @@ GRANT SELECT, INSERT ON public.respostas TO authenticated;
 GRANT ALL ON public.respostas TO service_role;
 ALTER TABLE public.respostas ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Qualquer um cria respostas" ON public.respostas;
 CREATE POLICY "Qualquer um cria respostas"
   ON public.respostas FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Autenticados leem respostas" ON public.respostas;
 CREATE POLICY "Autenticados leem respostas"
   ON public.respostas FOR SELECT TO authenticated USING (true);
 
@@ -41,15 +43,20 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.anotacoes TO authenticated;
 GRANT ALL ON public.anotacoes TO service_role;
 ALTER TABLE public.anotacoes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Autenticados leem anotacoes" ON public.anotacoes;
 CREATE POLICY "Autenticados leem anotacoes"
   ON public.anotacoes FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Autor cria anotacao" ON public.anotacoes;
 CREATE POLICY "Autor cria anotacao"
   ON public.anotacoes FOR INSERT TO authenticated WITH CHECK (auth.uid() = autor_id);
+DROP POLICY IF EXISTS "Autor edita a propria anotacao" ON public.anotacoes;
 CREATE POLICY "Autor edita a propria anotacao"
   ON public.anotacoes FOR UPDATE TO authenticated USING (auth.uid() = autor_id) WITH CHECK (auth.uid() = autor_id);
+DROP POLICY IF EXISTS "Autor apaga a propria anotacao" ON public.anotacoes;
 CREATE POLICY "Autor apaga a propria anotacao"
   ON public.anotacoes FOR DELETE TO authenticated USING (auth.uid() = autor_id);
 
+DROP TRIGGER IF EXISTS trg_anotacoes_atualizado_em ON public.anotacoes;
 CREATE TRIGGER trg_anotacoes_atualizado_em
   BEFORE UPDATE ON public.anotacoes
   FOR EACH ROW EXECUTE FUNCTION public.tg_set_atualizado_em();
@@ -69,8 +76,10 @@ GRANT SELECT, INSERT ON public.historico_status TO authenticated;
 GRANT ALL ON public.historico_status TO service_role;
 ALTER TABLE public.historico_status ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Autenticados leem historico" ON public.historico_status;
 CREATE POLICY "Autenticados leem historico"
   ON public.historico_status FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Autenticados registram historico" ON public.historico_status;
 CREATE POLICY "Autenticados registram historico"
   ON public.historico_status FOR INSERT TO authenticated WITH CHECK (auth.uid() = autor_id);
 
@@ -92,13 +101,17 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.contatos_apoio TO authenticated;
 GRANT ALL ON public.contatos_apoio TO service_role;
 ALTER TABLE public.contatos_apoio ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Contatos ativos sao publicos" ON public.contatos_apoio;
 CREATE POLICY "Contatos ativos sao publicos"
   ON public.contatos_apoio FOR SELECT TO anon, authenticated USING (ativo = true);
+DROP POLICY IF EXISTS "Autenticados criam contatos" ON public.contatos_apoio;
 CREATE POLICY "Autenticados criam contatos"
   ON public.contatos_apoio FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Autenticados editam contatos" ON public.contatos_apoio;
 CREATE POLICY "Autenticados editam contatos"
   ON public.contatos_apoio FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 
+DROP TRIGGER IF EXISTS trg_contatos_apoio_atualizado_em ON public.contatos_apoio;
 CREATE TRIGGER trg_contatos_apoio_atualizado_em
   BEFORE UPDATE ON public.contatos_apoio
   FOR EACH ROW EXECUTE FUNCTION public.tg_set_atualizado_em();
