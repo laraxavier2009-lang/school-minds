@@ -116,8 +116,16 @@ CREATE TRIGGER trg_contatos_apoio_atualizado_em
   BEFORE UPDATE ON public.contatos_apoio
   FOR EACH ROW EXECUTE FUNCTION public.tg_set_atualizado_em();
 
-INSERT INTO public.contatos_apoio (nome, descricao, telefone, site, ordem) VALUES
+INSERT INTO public.contatos_apoio (nome, descricao, telefone, site, ordem)
+SELECT seeds.nome, seeds.descricao, seeds.telefone, seeds.site, seeds.ordem
+FROM (VALUES
   ('CVV - Centro de Valorização da Vida', 'Apoio emocional e prevenção do suicídio, 24h, gratuito e sigiloso', '188', 'https://www.cvv.org.br', 1),
   ('CAPS - Centro de Atenção Psicossocial', 'Atendimento em saúde mental pelo SUS na sua cidade', NULL, 'https://www.gov.br/saude', 2),
   ('SAMU', 'Emergências médicas', '192', NULL, 3),
-  ('Orientação Educacional da Escola', 'Converse com a equipe de apoio da sua escola', NULL, NULL, 4);
+  ('Orientação Educacional da Escola', 'Converse com a equipe de apoio da sua escola', NULL, NULL, 4)
+) AS seeds(nome, descricao, telefone, site, ordem)
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM public.contatos_apoio AS existente
+  WHERE existente.nome = seeds.nome
+);

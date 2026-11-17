@@ -201,6 +201,7 @@ DROP POLICY IF EXISTS registros_insert_anon_authenticated ON public.registros;
 DROP POLICY IF EXISTS registros_select_equipe_escola ON public.registros;
 CREATE POLICY registros_insert_anon_authenticated
   ON public.registros FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS registros_select_equipe_escola ON public.registros;
 CREATE POLICY registros_select_equipe_escola
   ON public.registros FOR SELECT TO authenticated
   USING (EXISTS (
@@ -216,12 +217,14 @@ DROP POLICY IF EXISTS alertas_select_equipe_escola ON public.alertas;
 DROP POLICY IF EXISTS alertas_update_equipe_escola ON public.alertas;
 CREATE POLICY alertas_insert_anon_authenticated
   ON public.alertas FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS alertas_select_equipe_escola ON public.alertas;
 CREATE POLICY alertas_select_equipe_escola
   ON public.alertas FOR SELECT TO authenticated
   USING (EXISTS (
     SELECT 1 FROM public.equipe_escola AS equipe
     WHERE equipe.user_id = (SELECT auth.uid())
   ));
+DROP POLICY IF EXISTS alertas_update_equipe_escola ON public.alertas;
 CREATE POLICY alertas_update_equipe_escola
   ON public.alertas FOR UPDATE TO authenticated
   USING (EXISTS (
