@@ -15,11 +15,11 @@ CREATE TABLE IF NOT EXISTS public.acessos_portal (
   )
 );
 
-CREATE INDEX acessos_portal_etapa_data_idx
-  ON public.acessos_portal(etapa, criado_em DESC);
-CREATE INDEX acessos_portal_nivel_data_idx
-  ON public.acessos_portal(nivel_risco, criado_em DESC)
-  WHERE nivel_risco IS NOT NULL;
+CREATE INDEX IF NOT EXISTS acessos\_portal\_etapa\_data\_idx
+ ON public.acessos\_portal(etapa, criado\_em DESC);
+CREATE INDEX IF NOT EXISTS acessos\_portal\_nivel\_data\_idx
+ ON public.acessos\_portal(nivel\_risco, criado\_em DESC)
+  WHERE nivel\_risco IS NOT NULL;
 
 ALTER TABLE public.acessos_portal ENABLE ROW LEVEL SECURITY;
 
