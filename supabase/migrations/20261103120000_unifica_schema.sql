@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS public.sessao (
 ALTER TABLE public.equipe_escola
   ADD COLUMN IF NOT EXISTS user_id uuid;
 
-UPDATE public.equipe_escola
-SET user_id = id
-WHERE user_id IS NULL;
+-- UPDATE public.equipe_escola
+-- SET user_id = id
+-- WHERE user_id IS NULL;
 
 ALTER TABLE public.equipe_escola
   ALTER COLUMN user_id SET NOT NULL;
